@@ -2,3 +2,8 @@
 route_map.html
 track_map.html
 routed_track.html
+estimated_train.html
+live_train.html
+curvy_vs_straight.html
+
+*.html
