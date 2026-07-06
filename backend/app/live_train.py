@@ -4,6 +4,7 @@ from datetime import datetime, date
 import osmnx as ox
 import folium
 from shapely.geometry import LineString
+from track_builder import build_route_track
 
 from rtt_client import get_access_token, get_location_board, get_service
 from stations import load_station_coords
@@ -72,8 +73,8 @@ if __name__ == "__main__":
         print("No track route found between these stations on the graph.")
         raise SystemExit
 
-    route_coords = [(G.nodes[n]["x"], G.nodes[n]["y"]) for n in route]
-    track = LineString(route_coords)
+    # --- Build the curvy track that follows the real rails ---
+    track = build_route_track(G, route)
 
     # --- Estimate live position ---
     pos = estimate_position(track, a["departure"], b["arrival"], now)
@@ -81,7 +82,7 @@ if __name__ == "__main__":
 
     # --- Plot ---
     m = folium.Map(location=[a_lat, a_lon], zoom_start=13)
-    folium.PolyLine([(lat, lon) for lon, lat in route_coords],
+    folium.PolyLine([(lat, lon) for lon, lat in track.coords],
                     color="green", weight=4).add_to(m)
     folium.Marker([a_lat, a_lon], popup=a["name"]).add_to(m)
     folium.Marker([b_lat, b_lon], popup=b["name"]).add_to(m)
