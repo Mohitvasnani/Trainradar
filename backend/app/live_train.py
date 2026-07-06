@@ -1,0 +1,94 @@
+import webbrowser
+from datetime import datetime, date
+
+import osmnx as ox
+import folium
+from shapely.geometry import LineString
+
+from rtt_client import get_access_token, get_location_board, get_service
+from stations import load_station_coords
+from osm_graph import load_rail_graph
+from estimate import estimate_position
+from find_current_leg import get_leg_times
+
+
+def find_live_leg(service, now):
+    """Return (a, b) for the leg this service is on now, or None."""
+    locations = service.get("service", {}).get("locations", [])
+    legs = [get_leg_times(loc) for loc in locations]
+    for i in range(len(legs) - 1):
+        a, b = legs[i], legs[i + 1]
+        if a["departure"] and b["arrival"] and a["departure"] <= now <= b["arrival"]:
+            return a, b
+    return None
+
+
+if __name__ == "__main__":
+    token, _ = get_access_token()
+    board = get_location_board(token, code="LIV")
+    services = board.get("services", [])
+    today = date.today().isoformat()
+    now = datetime.now()
+
+    print(f"Scanning {len(services)} services for one running right now...\n")
+
+    # --- Scan services to find one that's mid-journey ---
+    live = None
+    for s in services:
+        identity = s["scheduleMetadata"]["identity"]
+        try:
+            service = get_service(token, identity=identity, departure_date=today)
+        except Exception:
+            continue
+        leg = find_live_leg(service, now)
+        if leg:
+            live = (identity, leg)
+            print(f"Found live service {identity}: {leg[0]['name']} -> {leg[1]['name']}")
+            break
+
+    if not live:
+        print("No services at LIV are mid-journey at this exact moment.")
+        print("This is normal off-peak — try a busier station or time.")
+        raise SystemExit
+
+    identity, (a, b) = live
+
+    # --- Route the real track between the two stations ---
+    coords = load_station_coords()
+    if a["crs"] not in coords or b["crs"] not in coords:
+        print("A station on this leg has no coordinate; skipping plot.")
+        raise SystemExit
+
+    a_lat, a_lon = coords[a["crs"]]
+    b_lat, b_lon = coords[b["crs"]]
+
+    print("Loading rail graph...")
+    G = load_rail_graph()
+    a_node = ox.distance.nearest_nodes(G, a_lon, a_lat)
+    b_node = ox.distance.nearest_nodes(G, b_lon, b_lat)
+    route = ox.shortest_path(G, a_node, b_node, weight="length")
+
+    if not route:
+        print("No track route found between these stations on the graph.")
+        raise SystemExit
+
+    route_coords = [(G.nodes[n]["x"], G.nodes[n]["y"]) for n in route]
+    track = LineString(route_coords)
+
+    # --- Estimate live position ---
+    pos = estimate_position(track, a["departure"], b["arrival"], now)
+    print(f"Estimated live position: lat {pos.y}, lon {pos.x}")
+
+    # --- Plot ---
+    m = folium.Map(location=[a_lat, a_lon], zoom_start=13)
+    folium.PolyLine([(lat, lon) for lon, lat in route_coords],
+                    color="green", weight=4).add_to(m)
+    folium.Marker([a_lat, a_lon], popup=a["name"]).add_to(m)
+    folium.Marker([b_lat, b_lon], popup=b["name"]).add_to(m)
+    folium.CircleMarker([pos.y, pos.x], radius=8, color="red", fill=True,
+                        fill_opacity=1, popup=f"{identity} (live)").add_to(m)
+
+    out = "live_train.html"
+    m.save(out)
+    print(f"Saved {out} — opening")
+    webbrowser.open(out)
