@@ -26,7 +26,7 @@ def find_live_leg(service, now):
 
 if __name__ == "__main__":
     token, _ = get_access_token()
-    board = get_location_board(token, code="LIV")
+    board = get_location_board(token, code="MAN")
     services = board.get("services", [])
     today = date.today().isoformat()
     now = datetime.now()
