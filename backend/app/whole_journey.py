@@ -11,8 +11,7 @@ from osm_graph import load_rail_graph
 from estimate import estimate_position
 from find_current_leg import get_leg_times
 from route_leg import route_leg
-from live_train import find_live_leg   # reuse the function we already wrote
-
+from live_train import find_live_leg  
 
 def build_full_journey(G, coords, legs):
     """
@@ -53,25 +52,39 @@ if __name__ == "__main__":
     now = datetime.now()
 
     print(f"Scanning {len(services)} services...")
-    live = None
+    live_services = []
     for s in services:
         identity = s["scheduleMetadata"]["identity"]
         try:
             service = get_service(token, identity=identity, departure_date=today)
         except Exception:
             continue
-        if find_live_leg(service, now):
-            live = (identity, service)
-            break
+        leg = find_live_leg(service, now)
+        if leg:
+            a, b = leg
+            live_services.append((identity, service, a, b))
 
-    if not live:
+        
+
+    if not live_services:
         print("No live service found right now — run again.")
         raise SystemExit
+    print(f"\nFound {len(live_services)} live services:\n")
+    for i, (ident, svc, a, b) in enumerate(live_services):
+        print(f"  [{i}]  {ident}:  {a['name']} -> {b['name']}")
+    print()
 
-    identity, service = live
+    identity, service = live_services
     locations = service.get("service", {}).get("locations", [])
     legs = [get_leg_times(loc) for loc in locations]
-    print(f"Service {identity}: {len(legs)} stations")
+    
+    
+    print(f"Service {identity}: {len(legs)} stations\n")
+    for leg in legs:
+        t = leg["departure"] or leg["arrival"]
+        time_str = t.strftime("%H:%M") if t else "  ?  "
+        print(f"  {time_str}  {leg['name']}")
+    print()
 
     print("Loading rail graph...")
     G = load_rail_graph()
