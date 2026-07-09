@@ -36,7 +36,7 @@ def build_full_journey(G, coords, legs):
     if not segments:
         return None, routed, skipped
 
-    # Stitch all leg-tracks into one line
+    #putting all journeys on the same line
     full_track = linemerge(segments)
     return full_track, routed, skipped
 
@@ -45,7 +45,7 @@ if __name__ == "__main__":
     token, _ = get_access_token()
     coords = load_station_coords()
 
-    # Find a live service at Manchester
+    # finding current train in city
     board = get_location_board(token, code="MAN")
     services = board.get("services", [])
     today = date.today().isoformat()
@@ -69,33 +69,44 @@ if __name__ == "__main__":
     if not live_services:
         print("No live service found right now — run again.")
         raise SystemExit
-    print(f"\nFound {len(live_services)} live services:\n")
-    for i, (ident, svc, a, b) in enumerate(live_services):
-        print(f"  [{i}]  {ident}:  {a['name']} -> {b['name']}")
+
+    print("Loading rail graph...")
+    G = load_rail_graph()
+
+    print(f"\nChecking coverage for {len(live_services)} live services...\n")
+
+    checked = []
+    for ident, svc, a, b in live_services:
+        locations = svc.get("service", {}).get("locations", [])
+        legs = [get_leg_times(loc) for loc in locations]
+        _, routed, skipped = build_full_journey(G, coords, legs)
+        checked.append((ident, svc, a, b, legs, routed, skipped))
+
+    print("Live services (v = fully within corridor):\n")
+    for i, (ident, svc, a, b, legs, routed, skipped) in enumerate(checked):
+        mark = "v" if skipped == 0 else " "
+        print(f"  [{i}] {mark} {ident}:  {a['name']} -> {b['name']}"
+              f"   ({routed} routed, {skipped} skipped)")
     print()
 
-    identity, service = live_services
-    locations = service.get("service", {}).get("locations", [])
-    legs = [get_leg_times(loc) for loc in locations]
-    
-    
-    print(f"Service {identity}: {len(legs)} stations\n")
+    choice = int(input("Select service number: "))
+    identity, service, a, b, legs, routed, skipped = checked[choice]
+    print(f"\nShowing {identity}: {a['name']} -> {b['name']}")
+    print(f"Coverage: {routed} legs routed, {skipped} skipped\n")
+
     for leg in legs:
         t = leg["departure"] or leg["arrival"]
         time_str = t.strftime("%H:%M") if t else "  ?  "
         print(f"  {time_str}  {leg['name']}")
     print()
 
-    print("Loading rail graph...")
-    G = load_rail_graph()
-
-    # Build the whole-journey track
     full_track, routed, skipped = build_full_journey(G, coords, legs)
-    print(f"Routed {routed} legs, skipped {skipped}")
-
     if full_track is None:
         print("Could not build a journey track.")
         raise SystemExit
+
+
+
 
     # Find the current leg and estimate the train's position on it
     current = find_live_leg(service, now)

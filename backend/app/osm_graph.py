@@ -2,10 +2,10 @@ import os
 import osmnx as ox
 
 # Bounding box around Liverpool (north, south, east, west)
-NORTH, SOUTH, EAST, WEST = 53.55, 53.05, -2.15, -3.90
+NORTH, SOUTH, EAST, WEST = 55.00, 52.90, -1.90, -3.95
 
 # we just fetch the railway instaed of roads
-RAIL_FILTER = '["railway"~"rail"]'
+RAIL_FILTER = '["railway"="rail"]'
 
 
 CACHE_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "rail_graph.graphml")
