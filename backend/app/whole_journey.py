@@ -39,7 +39,7 @@ def build_full_journey(G, coords, legs):
     #putting all journeys on the same line
     full_track = linemerge(segments)
     return full_track, routed, skipped
-
+sww
 
 if __name__ == "__main__":
     token, _ = get_access_token()
