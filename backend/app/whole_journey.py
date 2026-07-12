@@ -26,7 +26,7 @@ def build_full_journey(G, coords, legs):
         crs_a = legs[i]["crs"]
         crs_b = legs[i + 1]["crs"]
 
-        leg_track = route_leg(G, coords, crs_a, crs_b)
+        leg_track, snap_a, snap_b = route_leg(G, coords, crs_a, crs_b)
         if leg_track is not None:
             segments.append(leg_track)
             routed += 1
@@ -39,7 +39,7 @@ def build_full_journey(G, coords, legs):
     #putting all journeys on the same line
     full_track = linemerge(segments)
     return full_track, routed, skipped
-sww
+
 
 if __name__ == "__main__":
     token, _ = get_access_token()
@@ -111,7 +111,7 @@ if __name__ == "__main__":
     # Find the current leg and estimate the train's position on it
     current = find_live_leg(service, now)
     a, b = current
-    leg_track = route_leg(G, coords, a["crs"], b["crs"])
+    leg_track, _, _ = route_leg(G, coords, a["crs"], b["crs"])
     pos = estimate_position(leg_track, a["departure"], b["arrival"], now)
 
     # --- Plot ---
