@@ -1,11 +1,13 @@
 import os
 import osmnx as ox
 
+ox.settings.max_query_area_size = 50_000_000_000  # much larger, avoids tiling
+
 # Bounding box around Liverpool (north, south, east, west)
 NORTH, SOUTH, EAST, WEST = 55.00, 52.90, -1.90, -3.95
 
 # we just fetch the railway instaed of roads
-RAIL_FILTER = '["railway"="rail"]'
+RAIL_FILTER = '["railway"~"rail"]["railway"!~"tram|light_rail|subway|miniature|monorail|funicular"]'
 
 
 CACHE_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "rail_graph.graphml")
@@ -23,7 +25,7 @@ def load_rail_graph():
         bbox,
         custom_filter=RAIL_FILTER,
         retain_all=True,
-        simplify=True,
+        simplify=False,
     )
 
     # Save it so next time is instant

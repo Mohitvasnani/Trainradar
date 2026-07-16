@@ -50,7 +50,7 @@ if  __name__ == "__main__":
     coords = load_station_coords()
 
     #quick testing  routing one leg
-for crs_a, crs_b in [("MAN", "SPT"), ("BDY", "BNT")]:
+    for crs_a, crs_b in [("MAN", "SPT"), ("BDY", "BNT")]:
         track, snap_a, snap_b = route_leg(G, coords, crs_a, crs_b)
         if track:
             print(f"{crs_a}->{crs_b}: OK  "

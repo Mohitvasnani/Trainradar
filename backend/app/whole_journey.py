@@ -112,6 +112,9 @@ if __name__ == "__main__":
     current = find_live_leg(service, now)
     a, b = current
     leg_track, _, _ = route_leg(G, coords, a["crs"], b["crs"])
+    if leg_track is None:
+        print("cannot estimate position: failed snapping check")
+        raise SystemExit
     pos = estimate_position(leg_track, a["departure"], b["arrival"], now)
 
     # --- Plot ---
