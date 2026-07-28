@@ -13,6 +13,10 @@ from route_leg import route_leg
 from estimate import estimate_position
 from live_train import find_live_leg
 
+
+# The corridor this deployment covers. Today: one station.
+# Extending the area = adding codes here, no logic changes.
+CORRIDOR_STATIONS = ["MAN"]
 print("Loading station coordinates...")
 coords = load_station_coords()
 
@@ -21,7 +25,7 @@ G = load_rail_graph()
 print(f"Graph ready: {len(G.nodes)} nodes")
 
 app = Flask(__name__)
-CORS(app)
+CORS(app)    
 
 #####################################
 #RTT access token management
@@ -99,6 +103,30 @@ def departures(crs):
 
     return jsonify({"station": crs, "services": services})
 
+def estimate_train(svc, token, run_date, now):
+    """Estimate one service's position. Returns a dict, or None if not placeable."""
+    identity = svc.get("scheduleMetadata", {}).get("identity")
+    service = get_service_cached(token, identity, run_date)
+
+    leg = find_live_leg(service, now)
+    if leg is None:
+        return None
+
+    a, b = leg
+    track = get_route(a["crs"], b["crs"])
+    if track is None:
+        return None
+
+    pos = estimate_position(track, a["departure"], b["arrival"], now)
+    return {
+        "uid": identity,
+        "operator": svc.get("scheduleMetadata", {}).get("operator", {}).get("name"),
+        "legFrom": a["name"],
+        "legTo": b["name"],
+        "lat": round(pos.y, 6),
+        "lon": round(pos.x, 6),
+    }
+
 _service_cache = {}
 SERVICE_TTL = 60   # seconds
 
@@ -140,48 +168,36 @@ def get_route(crs_a, crs_b):
     return _route_cache[key]
 
 
-@app.route("/api/trains/<crs>")
-def trains(crs):
-    crs = crs.upper()
+@app.route("/api/trains")
+def trains_area():
     token = get_token()
-    board = rtt_client.get_location_board(token, code=crs)
-
     today = date.today().isoformat()
     now = datetime.now()
+
+    candidates = {}          # uid -> svc, deduplicated
+    for crs in CORRIDOR_STATIONS:
+        board = rtt_client.get_location_board(token, code=crs)
+        for svc in board.get("services", []):
+            if not is_possibly_running(svc, now):
+                continue
+            uid = svc.get("scheduleMetadata", {}).get("identity")
+            if uid:
+                candidates[uid] = svc
+
     results = []
-
-    for svc in board.get("services", []):
-        if not is_possibly_running(svc, now):
-            continue
-
-        identity = svc.get("scheduleMetadata", {}).get("identity")
+    for uid, svc in candidates.items():
         try:
-            service = get_service_cached(token, identity, today)
-
-            leg = find_live_leg(service, now)
-            if leg is None:
-                continue
-
-            a, b = leg
-            track = get_route(a["crs"], b["crs"])
-            if track is None:
-                continue
-
-            pos = estimate_position(track, a["departure"], b["arrival"], now)
-
-            results.append({
-                "uid": identity,
-                "operator": svc.get("scheduleMetadata", {}).get("operator", {}).get("name"),
-                "legFrom": a["name"],
-                "legTo": b["name"],
-                "lat": round(pos.y, 6),
-                "lon": round(pos.x, 6),
-            })
+            train = estimate_train(svc, token, today, now)
+            if train:
+                results.append(train)
         except Exception as e:
-            print(f"skipping {identity}: {e}")
-            continue
+            print(f"skipping {uid}: {e}")
 
-    return jsonify({"station": crs, "count": len(results), "trains": results})
+    return jsonify({
+        "coverage": CORRIDOR_STATIONS,
+        "count": len(results),
+        "trains": results,
+    })
 
 if __name__ == "__main__":
     print(app.url_map)
