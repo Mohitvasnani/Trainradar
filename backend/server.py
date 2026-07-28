@@ -3,6 +3,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent / "app"))
 import time
 from flask import Flask, jsonify, abort
+from flask_cors import CORS
 from datetime import datetime, date, timedelta
 
 import rtt_client
@@ -20,6 +21,7 @@ G = load_rail_graph()
 print(f"Graph ready: {len(G.nodes)} nodes")
 
 app = Flask(__name__)
+CORS(app)
 
 #####################################
 #RTT access token management
