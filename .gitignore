@@ -3,3 +3,5 @@ backend/outputs/*.html
 backend/data/*.graphml
 __pycache__/
 backend/test_*.py
+node_modules/
+frontend/dist/
