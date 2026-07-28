@@ -1,6 +1,23 @@
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent / "app"))
+import time
 from flask import Flask, jsonify, abort
-from datetime import datetime
-from app import rtt_client
+from datetime import datetime, date, timedelta
+
+import rtt_client
+from stations import load_station_coords
+from osm_graph import load_rail_graph
+from route_leg import route_leg
+from estimate import estimate_position
+from live_train import find_live_leg
+
+print("Loading station coordinates...")
+coords = load_station_coords()
+
+print("Loading rail graph (this takes a moment)...")
+G = load_rail_graph()
+print(f"Graph ready: {len(G.nodes)} nodes")
 
 app = Flask(__name__)
 
@@ -15,7 +32,7 @@ def get_token():
     now = datetime.now().timestamp()
     if _token is None or _token_expiry is None or now>= _token_expiry:
         token, valid_until = rtt_client.get_access_token()
-        print(repr(valid_until))
+      
         expiry = datetime.fromisoformat(valid_until).timestamp()-60
         _token = token
         _token_expiry = expiry
@@ -80,5 +97,92 @@ def departures(crs):
 
     return jsonify({"station": crs, "services": services})
 
+_service_cache = {}
+SERVICE_TTL = 60   # seconds
+
+def get_service_cached(token, identity, run_date):
+    key = (identity, run_date)
+    hit = _service_cache.get(key)
+    if hit and time.time() - hit[0] < SERVICE_TTL:
+        return hit[1]
+    data = rtt_client.get_service(token, identity=identity, departure_date=run_date)
+    _service_cache[key] = (time.time(), data)
+    return data
+
+def is_possibly_running(svc, now):
+    """Cheap pre-filter using only board data — costs no API call."""
+    temporal = svc.get("temporalData", {})
+    arrival = temporal.get("arrival") or {}
+    departure = temporal.get("departure") or {}
+    if arrival.get("isCancelled") or departure.get("isCancelled"):
+        return False
+
+    origin = (svc.get("origin") or [{}])[0]
+    dest = (svc.get("destination") or [{}])[0]
+    origin_dep = (origin.get("temporalData") or {}).get("scheduleAdvertised")
+    dest_arr = (dest.get("temporalData") or {}).get("scheduleAdvertised")
+    if not origin_dep or not dest_arr:
+        return False
+
+    start = datetime.fromisoformat(origin_dep)
+    end = datetime.fromisoformat(dest_arr) + timedelta(minutes=30)
+    return start <= now <= end
+
+_route_cache = {}
+
+def get_route(crs_a, crs_b):
+    key = (crs_a, crs_b)
+    if key not in _route_cache:
+        track, snap_a, snap_b = route_leg(G, coords, crs_a, crs_b)
+        _route_cache[key] = track
+    return _route_cache[key]
+
+
+@app.route("/api/trains/<crs>")
+def trains(crs):
+    crs = crs.upper()
+    token = get_token()
+    board = rtt_client.get_location_board(token, code=crs)
+
+    today = date.today().isoformat()
+    now = datetime.now()
+    results = []
+
+    for svc in board.get("services", []):
+        if not is_possibly_running(svc, now):
+            continue
+
+        identity = svc.get("scheduleMetadata", {}).get("identity")
+        try:
+            service = get_service_cached(token, identity, today)
+
+            leg = find_live_leg(service, now)
+            if leg is None:
+                continue
+
+            a, b = leg
+            track = get_route(a["crs"], b["crs"])
+            if track is None:
+                continue
+
+            pos = estimate_position(track, a["departure"], b["arrival"], now)
+
+            results.append({
+                "uid": identity,
+                "operator": svc.get("scheduleMetadata", {}).get("operator", {}).get("name"),
+                "legFrom": a["name"],
+                "legTo": b["name"],
+                "lat": round(pos.y, 6),
+                "lon": round(pos.x, 6),
+            })
+        except Exception as e:
+            print(f"skipping {identity}: {e}")
+            continue
+
+    return jsonify({"station": crs, "count": len(results), "trains": results})
+
 if __name__ == "__main__":
+    print(app.url_map)
     app.run(debug=True)
+
+
