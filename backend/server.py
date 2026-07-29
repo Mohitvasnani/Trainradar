@@ -171,7 +171,7 @@ def get_route(crs_a, crs_b):
 @app.route("/api/trains")
 def trains_area():
     token = get_token()
-    today = date.today().isoformat()sss
+    today = date.today().isoformat()
     now = datetime.now()
 
     candidates = {}          # uid -> svc, deduplicated
