@@ -6,13 +6,19 @@ function App() {
   const [trains, setTrains] = useState([])
 
   useEffect(() => {
-    fetch('http://127.0.0.1:5000/api/trains')
-      .then(res => res.json())
-      .then(data => {
-        console.log('got:', data)
-        setTrains(data.trains)
-      })
-      .catch(err => console.error('fetch failed:', err))
+    const load = () => {
+      fetch('http://127.0.0.1:5000/api/trains')
+        .then(res => res.json())
+        .then(data => {
+          console.log(new Date().toLocaleTimeString(), 'got:', data.count, 'trains')
+          setTrains(data.trains)
+        })
+        .catch(err => console.error('fetch failed:', err))
+    }
+
+    load()
+    const id = setInterval(load, 30000)
+    return () => clearInterval(id)
   }, [])
 
   return (
@@ -33,9 +39,10 @@ function App() {
           pathOptions={{ color: 'red', fillColor: 'red', fillOpacity: 0.8 }}
         >
           <Popup>
-            <strong>{train.uid}</strong><br />
+            <strong>{train.headcode || train.uid}</strong>{train.isEstimate && ' · est.'}<br />
             {train.operator}<br />
-            {train.legFrom} → {train.legTo}
+            between {train.legFrom} and {train.legTo}<br />
+            {train.latenessMinutes ? `${train.latenessMinutes} min late` : 'on time'}
           </Popup>
         </CircleMarker>
       ))}

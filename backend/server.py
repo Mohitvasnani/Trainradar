@@ -167,6 +167,44 @@ def get_route(crs_a, crs_b):
         _route_cache[key] = track
     return _route_cache[key]
 
+def estimate_train(svc, token, run_date, now):
+    """Estimate one service's position. Returns a dict, or None if not placeable."""
+    meta = svc.get("scheduleMetadata", {})
+    identity = meta.get("identity")
+    service = get_service_cached(token, identity, run_date)
+
+    leg = find_live_leg(service, now)
+    if leg is None:
+        return None
+
+    a, b = leg
+    track = get_route(a["crs"], b["crs"])
+    if track is None:
+        return None
+
+    pos = estimate_position(track, a["departure"], b["arrival"], now)
+
+    temporal = svc.get("temporalData", {})
+    arrival = temporal.get("arrival") or {}
+    departure = temporal.get("departure") or {}
+    lateness = departure.get("realtimeAdvertisedLateness")
+    if lateness is None:
+        lateness = arrival.get("realtimeAdvertisedLateness")
+
+    return {
+        "uid": identity,
+        "headcode": meta.get("trainReportingIdentity"),
+        "operator": meta.get("operator", {}).get("name"),
+        "legFrom": a["name"],
+        "legTo": b["name"],
+        "lat": round(pos.y, 6),
+        "lon": round(pos.x, 6),
+        "latenessMinutes": lateness,
+        "status": temporal.get("status"),
+        "estimatedAt": now.isoformat(timespec="seconds"),
+        "isEstimate": True,
+    }
+
 
 @app.route("/api/trains")
 def trains_area():
@@ -204,3 +242,4 @@ if __name__ == "__main__":
     app.run(debug=True)
 
 
+  

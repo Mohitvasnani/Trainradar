@@ -182,3 +182,21 @@
     border-right-color: var(--border);
   }
 }
+
+
+.app[data-theme="dark"] {
+  --bg: #1c1c1e;
+  --panel: #252528;
+  --text: #e8e8ea;
+  --muted: #8a8a90;
+  --accent: #4da3ff;
+  --late: #e0a030;
+}
+.app[data-theme="light"] {
+  --bg: #ffffff;
+  --panel: #f5f5f7;
+  --text: #1c1c1e;
+  --muted: #6a6a70;
+  --accent: #0066cc;
+  --late: #b57314;
+}
