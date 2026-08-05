@@ -1,53 +1,28 @@
-import { useState, useEffect } from 'react'
-import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet'
-import 'leaflet/dist/leaflet.css'
+import { useState } from 'react'
+import { useTrains } from './hooks/useTrains'
+import Header from './components/Header'
+import Sidebar from './components/Sidebar'
+import MapView from './components/MapView'
+import './theme.css'
+import './App.css'
 
-function App() {
-  const [trains, setTrains] = useState([])
-
-  useEffect(() => {
-    const load = () => {
-      fetch('http://127.0.0.1:5000/api/trains')
-        .then(res => res.json())
-        .then(data => {
-          console.log(new Date().toLocaleTimeString(), 'got:', data.count, 'trains')
-          setTrains(data.trains)
-        })
-        .catch(err => console.error('fetch failed:', err))
-    }
-
-    load()
-    const id = setInterval(load, 30000)
-    return () => clearInterval(id)
-  }, [])
+export default function App() {
+  const [theme, setTheme] = useState('dark')
+  const [selectedUid, setSelectedUid] = useState(null)
+  const { trains, updatedAt, error } = useTrains()
 
   return (
-    <MapContainer
-      center={[53.4808, -2.2426]}
-      zoom={10}
-      style={{ height: '100vh', width: '100%' }}
-    >
-      <TileLayer
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        attribution='&copy; OpenStreetMap contributors'
+    <div className="app" data-theme={theme}>
+      <Header
+        theme={theme}
+        onToggleTheme={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+        updatedAt={updatedAt}
+        error={error}
       />
-      {trains.map(train => (
-        <CircleMarker
-          key={train.uid}
-          center={[train.lat, train.lon]}
-          radius={6}
-          pathOptions={{ color: 'red', fillColor: 'red', fillOpacity: 0.8 }}
-        >
-          <Popup>
-            <strong>{train.headcode || train.uid}</strong>{train.isEstimate && ' · est.'}<br />
-            {train.operator}<br />
-            between {train.legFrom} and {train.legTo}<br />
-            {train.latenessMinutes ? `${train.latenessMinutes} min late` : 'on time'}
-          </Popup>
-        </CircleMarker>
-      ))}
-    </MapContainer>
+      <div className="body">
+        <Sidebar trains={trains} selectedUid={selectedUid} onSelect={setSelectedUid} />
+        <MapView trains={trains} theme={theme} selectedUid={selectedUid} onSelect={setSelectedUid} />
+      </div>
+    </div>
   )
 }
-
-export default App

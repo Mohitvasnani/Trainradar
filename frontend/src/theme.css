@@ -1,0 +1,38 @@
+.app {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  color: var(--text);
+  background: var(--bg);
+}
+
+.app[data-theme="dark"] {
+  --bg: #1c1c1e;
+  --panel: #252528;
+  --panel-hover: #2e2e32;
+  --border: #37373c;
+  --text: #e8e8ea;
+  --muted: #8a8a90;
+  --accent: #4da3ff;
+  --ontime: #4caf7d;
+  --late: #e0a030;
+}
+
+.app[data-theme="light"] {
+  --bg: #ffffff;
+  --panel: #f5f5f7;
+  --panel-hover: #ebebef;
+  --border: #d8d8dd;
+  --text: #1c1c1e;
+  --muted: #6a6a70;
+  --accent: #0066cc;
+  --ontime: #2e7d52;
+  --late: #b57314;
+}
+
+.body {
+  flex: 1;
+  display: flex;
+  min-height: 0;   
+}
