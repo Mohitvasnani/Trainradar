@@ -1,5 +1,6 @@
-import { MapContainer, TileLayer,CircleMarker, Popup} from 'react-leaflet'
+import { MapContainer, TileLayer,CircleMarker, Popup, Polyline} from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
+import { useLeg } from '../hooks/useLeg'
 
 const TILES = {
   dark: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
@@ -7,6 +8,10 @@ const TILES = {
 }
 
 export default function MapView({trains, theme, selectedUid, onSelect}){
+    const selectedTrain=trains.find(
+        t=>t.uid === selectedUid
+    )
+    const legcords = useLeg(selectedTrain)
     return(
     <div className="map-wrap">
 
@@ -17,17 +22,24 @@ export default function MapView({trains, theme, selectedUid, onSelect}){
         url={TILES[theme]}
         attribution='&copy; OpenStreetMap contributors &copy; CARTO'
       />
+      {legcords && (
+    <Polyline
+      positions={legcords}
+      pathOptions={{ color: '#4da3ff', weight: 4, opacity: 0.7 }}
+    />
+  )}
       {trains.map(train=>{
         const selected = train.uid=== selectedUid
         return(
+            
             <CircleMarker 
             key={train.uid}
             center={[train.lat, train.lon]}
             radius={selected?9:5}
             eventHandlers={{click: ()=>onSelect(train.uid)}}
             pathOptions={{
-                color: selected?'var(--accent)':'#9a9aa0',
-                fillColor:selected?'var(--accent)':'#9a9aa0',
+               color: selected?'#4da3ff':'#9a9aa0',
+                fillColor:selected?'#4da3ff':'#9a9aa0',
                 fillOpacity:selected?1:0.7,
                 weight: selected? 3:1,
             }}>

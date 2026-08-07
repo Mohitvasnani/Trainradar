@@ -2,7 +2,7 @@ export default function ServiceRow ({train, selected, onSelect}) {
 
 
     const late =  train.latenessMinutes
-    const isLiveTrain = train.lat != null
+    const isLiveTrain = train.lat  != null
 
 
     return(

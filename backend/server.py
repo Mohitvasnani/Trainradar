@@ -203,6 +203,10 @@ def estimate_train(svc, token, run_date, now):
         "status": temporal.get("status"),
         "estimatedAt": now.isoformat(timespec="seconds"),
         "isEstimate": True,
+        "legFrom": a["name"],
+        "legTo": b["name"],
+        "legFromCrs": a["crs"],
+        "legToCrs": b["crs"],
     }
 
 
@@ -236,6 +240,23 @@ def trains_area():
         "count": len(results),
         "trains": results,
     })
+
+
+@app.route("/api/leg/<crs_a>/<crs_b>")
+def leg(crs_a, crs_b):
+    crs_a = crs_a.upper()
+    crs_b = crs_b.upper()
+
+    track = get_route(crs_a, crs_b)
+    if track is None:
+        abort(404, description=f"No routable track between {crs_a} and {crs_b}")
+
+    return jsonify({
+        "from": crs_a,
+        "to": crs_b,
+        "coordinates": [[round(y, 6), round(x, 6)] for x, y in track.coords],
+    })
+
 
 if __name__ == "__main__":
     print(app.url_map)
