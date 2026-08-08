@@ -1,6 +1,7 @@
 import { MapContainer, TileLayer,CircleMarker, Popup, Polyline} from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import { useLeg } from '../hooks/useLeg'
+import  ZoomToTrain from './ZoomToTrain'
 
 const TILES = {
   dark: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
@@ -13,6 +14,7 @@ export default function MapView({trains, theme, selectedUid, onSelect}){
     )
     const legcords = useLeg(selectedTrain)
     return(
+    
     <div className="map-wrap">
 
     
@@ -27,6 +29,7 @@ export default function MapView({trains, theme, selectedUid, onSelect}){
       positions={legcords}
       pathOptions={{ color: '#4da3ff', weight: 4, opacity: 0.7 }}
     />
+    
   )}
       {trains.map(train=>{
         const selected = train.uid=== selectedUid
@@ -43,6 +46,7 @@ export default function MapView({trains, theme, selectedUid, onSelect}){
                 fillOpacity:selected?1:0.7,
                 weight: selected? 3:1,
             }}>
+                <ZoomToTrain train={selectedTrain} />
                 <Popup>
                     <strong>
                         {train.headcode || train.uid}
