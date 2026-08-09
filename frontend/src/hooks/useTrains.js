@@ -5,6 +5,7 @@ export function useTrains(intervalMs = 60000) {
   const [trains, setTrains] = useState([])
   const [updatedAt, setUpdatedAt] = useState(null)
   const [error, setError] = useState(null)
+  const  [stale, setStale]= useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -16,6 +17,7 @@ export function useTrains(intervalMs = 60000) {
         setTrains(data.trains)
         setUpdatedAt(new Date())
         setError(null)
+        setStale(data.stale===true)
       } catch (err) {
         if (!cancelled) setError(err.message)
       }
@@ -29,5 +31,5 @@ export function useTrains(intervalMs = 60000) {
     }
   }, [intervalMs])
 
-  return { trains, updatedAt, error }
+  return { trains, updatedAt, error, stale}
 }

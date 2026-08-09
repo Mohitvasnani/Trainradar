@@ -53,3 +53,4 @@
   position: absolute;
   inset: 0;
 }
+.status-stale { color: var(--late); }

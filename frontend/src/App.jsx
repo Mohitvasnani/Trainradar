@@ -9,7 +9,7 @@ import './App.css'
 export default function App() {
   const [theme, setTheme] = useState('dark')
   const [selectedUid, setSelectedUid] = useState(null)
-  const { trains, updatedAt, error } = useTrains()
+  const { trains, updatedAt, error, stale } = useTrains()
 
   return (
     <div className="app" data-theme={theme}>
@@ -17,6 +17,7 @@ export default function App() {
         theme={theme}
         onToggleTheme={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
         updatedAt={updatedAt}
+        stale={stale}
         error={error}
       />
       <div className="body">
