@@ -17,6 +17,7 @@ from osm_graph import load_rail_graph
 from route_leg import route_leg
 from estimate import estimate_position
 from live_train import find_live_leg
+import math
 
 
 # The corridor this deployment covers. Today: one station.
@@ -78,6 +79,46 @@ def get_service_cached(token, identity, run_date):
     data = rtt_client.get_service(token, identity=identity, departure_date=run_date)
     _service_cache[key] = (time.time(), data)
     return data
+
+
+EARTH_RADIUS_M = 6371000
+MAX_ROUTE_RATIO = 2.0      # routed length vs straight line
+MAX_SNAP_M = 300           # station to nearest graph node
+
+
+def haversine_m(lat1, lon1, lat2, lon2):
+    """Great-circle distance in metres between two lat/lon points."""
+    p1, p2 = math.radians(lat1), math.radians(lat2)
+    dp = math.radians(lat2 - lat1)
+    dl = math.radians(lon2 - lon1)
+    a = math.sin(dp / 2) ** 2 + math.cos(p1) * math.cos(p2) * math.sin(dl / 2) ** 2
+    return 2 * EARTH_RADIUS_M * math.asin(math.sqrt(a))
+
+
+def track_length_m(track):
+    """Total length of a LineString whose coords are (lon, lat)."""
+    total = 0.0
+    pts = list(track.coords)
+    for (lon1, lat1), (lon2, lat2) in zip(pts, pts[1:]):
+        total += haversine_m(lat1, lon1, lat2, lon2)
+    return total
+
+
+def route_plausibility(track, crs_a, crs_b):
+    """
+    Ratio of routed track length to straight-line station distance.
+
+    A doubling-back or wildly indirect route shows up as a high ratio.
+    Returns None when either station has no coordinates.
+    """
+    if crs_a not in coords or crs_b not in coords:
+        return None
+    lat_a, lon_a = coords[crs_a]
+    lat_b, lon_b = coords[crs_b]
+    straight = haversine_m(lat_a, lon_a, lat_b, lon_b)
+    if straight <= 0:
+        return None
+    return track_length_m(track) / straight
 
 
 _route_cache = {}
@@ -153,6 +194,7 @@ def estimate_train(svc, token, run_date, now):
         "lat": round(pos.y, 6),
         "lon": round(pos.x, 6),
         "latenessMinutes": lateness,
+         "runDate": run_date,
         "status": temporal.get("status"),
         "estimatedAt": now.isoformat(timespec="seconds"),
         "isEstimate": True,
@@ -185,3 +227,70 @@ def compile_serviceboard(svc):
         "isCancelled": arrival.get("isCancelled", False) or departure.get("isCancelled", False),
         "status": temporal.get("status"),
     }
+
+def journey_point(point):
+    """calling point  for schedule and actual times """
+    location = point.get("location",{})
+    crs=(location.get("shortCodes")or [None])[0]
+    if not crs:
+        return None
+
+    temporal = point.get("temporalData",{})
+    arr =temporal.get("arrival")or {}
+    dep=temporal.get("departure")or{}
+
+    def pick(block,*keys):
+        for k in keys:
+            if block.get(k):
+                return block[k]
+        return None
+    real_arr= arr.get("realtimeActual")
+    real_dep = dep.get("realtimeActual")
+
+
+    return {
+        "crs": crs,
+        "name": location.get("description", "?"),
+        "schedArr": pick(arr, "scheduleAdvertised", "scheduleInternal"),
+        "schedDep": pick(dep, "scheduleAdvertised", "scheduleInternal"),
+        "actualArr": real_arr,
+        "actualDep": real_dep,
+        "passed": bool(real_arr or real_dep),
+        "isCancelled": arr.get("isCancelled", False) or dep.get("isCancelled", False),
+        "platform": (point.get("locationMetadata", {}).get("platform", {}) or {}).get("actual"),
+    }
+
+
+def build_journey(token, identity, run_date):
+    """
+    Full journey for one service: calling points plus routed geometry per leg.
+
+    Each leg carries a `passed` flag so the frontend can colour completed
+    track differently from track still ahead.
+    """
+    service = get_service_cached(token, identity, run_date)
+    locations = service.get("service", {}).get("locations", [])
+
+    stops = [journey_point(loc) for loc in locations]
+    stops = [s for s in stops if s]
+
+    legs = []
+    for a, b in zip(stops, stops[1:]):
+        track = get_route(a["crs"], b["crs"])
+        if track is None:
+            continue
+
+        ratio = route_plausibility(track, a["crs"], b["crs"])
+        if ratio is not None and ratio > MAX_ROUTE_RATIO:
+            print(f"implausible route {a['crs']}->{b['crs']}: ratio {ratio:.1f}")
+            continue
+
+        legs.append({
+            "from": a["crs"],
+            "to": b["crs"],
+            "passed": b["passed"],
+            "ratio": round(ratio, 2) if ratio else None,
+            "coordinates": [[round(y, 6), round(x, 6)] for x, y in track.coords],
+        })
+
+    return {"uid": identity, "runDate": run_date, "stops": stops, "legs": legs}

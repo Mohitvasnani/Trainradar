@@ -112,4 +112,15 @@ def leg(crs_a, crs_b):
         "to": crs_b,
         "coordinates": [[round(y, 6), round(x, 6)] for x, y in track.coords],
     })
+
+@bp.get("/api/journey/<uid>/<run_date>")
+def journey(uid, run_date):
+    token = rtt.get_token()
+    try:
+        data = rtt.build_journey(token, uid, run_date)
+    except Exception as e:
+        abort(502, description=f"Could not build journey for {uid}: {e}")
+    if not data["stops"]:
+        abort(404, description=f"No journey data for {uid} on {run_date}")
+    return jsonify(data)
  
