@@ -15,7 +15,7 @@ export default function Header({ theme, onToggleTheme, updatedAt, error, stale }
   return (
     <header className="header">
       <span className="brand">TrainRadar</span>
-      <span className={statusClass}>{statusText}</span>
+      <span className={statusLevel}>{statusDef}</span>
       <button className="theme-btn" onClick={onToggleTheme}>
         {theme === 'dark' ? 'Light' : 'Dark'}
       </button>

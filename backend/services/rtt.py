@@ -179,7 +179,12 @@ def estimate_train(svc, token, run_date, now):
     temporal = svc.get("temporalData", {})
     arrival = temporal.get("arrival") or {}
     departure = temporal.get("departure") or {}
+
     lateness = departure.get("realtimeAdvertisedLateness")
+    origin_list = svc.get("origin") or [{}]
+    dest_list = svc.get("destination") or [{}]
+    origin = origin_list[0].get("location", {}).get("description")
+    destination = dest_list[0].get("location", {}).get("description")
     if lateness is None:
         lateness = arrival.get("realtimeAdvertisedLateness")
 
@@ -198,6 +203,8 @@ def estimate_train(svc, token, run_date, now):
         "status": temporal.get("status"),
         "estimatedAt": now.isoformat(timespec="seconds"),
         "isEstimate": True,
+        "origin": origin,
+        "destination": destination,
     }
 
 

@@ -10,6 +10,24 @@ export default function App() {
   const [theme, setTheme] = useState('dark')
   const [selectedUid, setSelectedUid] = useState(null)
   const { trains, updatedAt, error, stale } = useTrains()
+  const  [query, setQuery]=useState('')
+  const q=query.trim().toLowerCase()
+  let filtered
+  if (!q) {
+    filtered = trains
+  } else {
+    filtered=trains.filter(
+      t=>[t.headcode,
+        t.operator,
+        t.origin,
+        t.destination,
+        t.legFrom,
+        t.legTo,
+        t.uid].some(field=>
+        (field||'').toLowerCase().includes(q)
+        )
+    )
+  }
 
   return (
     <div className="app" data-theme={theme}>
