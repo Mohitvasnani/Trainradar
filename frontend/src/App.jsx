@@ -39,8 +39,9 @@ export default function App() {
         error={error}
       />
       <div className="body">
-        <Sidebar trains={trains} selectedUid={selectedUid} onSelect={setSelectedUid} />
-        <MapView trains={trains} theme={theme} selectedUid={selectedUid} onSelect={setSelectedUid} />
+        <Sidebar trains={filtered} selectedUid={selectedUid} onSelect={setSelectedUid}
+          query={query} onQueryChange={setQuery} />
+        <MapView trains={filtered} theme={theme} selectedUid={selectedUid} onSelect={setSelectedUid} />
       </div>
     </div>
   )

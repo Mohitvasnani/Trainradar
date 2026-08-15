@@ -3,10 +3,30 @@ import 'leaflet/dist/leaflet.css'
 import { useLeg } from '../hooks/useLeg'
 import  ZoomToTrain from './ZoomToTrain'
 import { useJourney } from '../hooks/useJourney'
+import {useState} from 'react'
+import Switcher from './Switcher'
+import { allLegs } from '../hooks/allLegs'
+import Legend from "./Legend";
+import TrainInfo from "./TrainInfo";
 
-const TILES = {
-  dark: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
-  light: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
+
+const LAYERS = {
+  dark: {
+    label: 'Dark',
+    url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
+    attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+  },
+  light: {
+    label: 'Light',
+    url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
+    attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+  },
+  terrain: {
+    label: 'Terrain',
+    url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
+    attribution: '&copy; OpenStreetMap contributors, SRTM | &copy; OpenTopoMap (CC-BY-SA)',
+    maxZoom: 17,
+  },
 }
 
 function fmt(iso) {
@@ -28,15 +48,27 @@ export default function MapView({trains, theme, selectedUid, onSelect}){
     )
     const journey = useJourney(selectedTrain)
     const legcords = useLeg(selectedTrain)
+    const [layer, setLayer] = useState('dark')
+  const tiles = LAYERS[layer]
+  const all = allLegs()
     return(
     
     <div className="map-wrap">
+     
+       <Switcher layer={layer} onChange={setLayer} layers={LAYERS} />
       <MapContainer center={[53.4808, -2.2426]} zoom={10} className="map">
         <TileLayer
-          key={theme}
-          url={TILES[theme]}
-          attribution='&copy; OpenStreetMap contributors &copy; CARTO'
+          key={layer}
+          url={tiles.url}
+          attribution={tiles.attribution} maxZoom={tiles.maxZoom||19}
         />
+        {all.map((leg, i) => (
+          <Polyline
+            key={`bg-${leg.from}-${leg.to}-${i}`}
+            positions={leg.coordinates}
+            pathOptions={{ color: '#4a4a52', weight: 2, opacity: 0.6 }}
+          />
+        ))}
 
         <ZoomToTrain train={selectedTrain} />
 
@@ -103,7 +135,12 @@ export default function MapView({trains, theme, selectedUid, onSelect}){
             </CircleMarker>
           )
         })}
+
+         
+      
       </MapContainer>
+      <TrainInfo train={selectedTrain} journey={journey} onClose={() => onSelect(null)} />
+        <Legend />
     </div>
     )
 }
