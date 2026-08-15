@@ -123,4 +123,24 @@ def journey(uid, run_date):
     if not data["stops"]:
         abort(404, description=f"No journey data for {uid} on {run_date}")
     return jsonify(data)
+
+@bp.get("/api/legs")
+def all_legs():
+    """Routed geometry for every currently running train's leg."""
+    result = []
+    seen = set()
+    for train in successful_result:
+        key = (train["legFromCrs"], train["legToCrs"])
+        if key in seen:
+            continue
+        seen.add(key)
+        track = rtt.get_route(*key)
+        if track is None:
+            continue
+        result.append({
+            "from": key[0],
+            "to": key[1],
+            "coordinates": [[round(y, 6), round(x, 6)] for x, y in track.coords],
+        })
+    return jsonify({"legs": result})
  
