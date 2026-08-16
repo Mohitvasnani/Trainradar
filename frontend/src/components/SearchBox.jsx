@@ -1,16 +1,32 @@
-export default function SearchBox({ value, onChange }) {
+export default function SearchBox({ from, to, text, onChange }) {
+  const hasAny = from || to || text
+
   return (
-    <div className="search-wrap">
+    <div className="search-panel">
       <input
         className="search-input"
-        type="text"
-        placeholder="Search service, station or operator"
-        value={value}
-        onChange={e => onChange(e.target.value)}
+        placeholder="From"
+        value={from}
+        onChange={e => onChange({ from: e.target.value, to, text })}
       />
-      {value && (
-        <button className="search-clear" onClick={() => onChange('')} aria-label="Clear search">
-          ×
+      <input
+        className="search-input"
+        placeholder="To"
+        value={to}
+        onChange={e => onChange({ from, to: e.target.value, text })}
+      />
+      <input
+        className="search-input"
+        placeholder="Headcode or operator"
+        value={text}
+        onChange={e => onChange({ from, to, text: e.target.value })}
+      />
+      {hasAny && (
+        <button
+          className="search-clear-all"
+          onClick={() => onChange({ from: '', to: '', text: '' })}
+        >
+          Clear filters
         </button>
       )}
     </div>

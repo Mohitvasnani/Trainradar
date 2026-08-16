@@ -1,6 +1,6 @@
 import { MapContainer, TileLayer,CircleMarker, Popup, Polyline} from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
-import { useLeg } from '../hooks/useLeg'
+
 import  ZoomToTrain from './ZoomToTrain'
 import { useJourney } from '../hooks/useJourney'
 import {useState} from 'react'
@@ -8,6 +8,7 @@ import Switcher from './Switcher'
 import { allLegs } from '../hooks/allLegs'
 import Legend from "./Legend";
 import TrainInfo from "./TrainInfo";
+
 
 
 const LAYERS = {
@@ -42,12 +43,12 @@ function stopLatLon(journey, crs) {
   return null
 }
 
-export default function MapView({trains, theme, selectedUid, onSelect}){
+export default function MapView({trains,  selectedUid, onSelect, pinnedJourneys}){
     const selectedTrain=trains.find(
         t=>t.uid === selectedUid
     )
     const journey = useJourney(selectedTrain)
-    const legcords = useLeg(selectedTrain)
+   
     const [layer, setLayer] = useState('dark')
   const tiles = LAYERS[layer]
   const all = allLegs()
@@ -84,6 +85,15 @@ export default function MapView({trains, theme, selectedUid, onSelect}){
             }}
           />
         ))}
+        {pinnedJourneys && Object.entries(pinnedJourneys).map(([uid, j]) =>
+          j.legs.map((leg, i) => (
+            <Polyline
+              key={`pin-${uid}-${i}`}
+              positions={leg.coordinates}
+              pathOptions={{ color: '#e0a030', weight: 3, opacity: 0.5 }}
+            />
+          ))
+        )}
 
         {journey && journey.stops.map(stop => {
           const latlon = stopLatLon(journey, stop.crs)
