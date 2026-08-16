@@ -1,3 +1,5 @@
+import '../css/Notify.css'
+
 export default function Notify({ items, onDismiss }) {
   if (items.length === 0) {
     return null

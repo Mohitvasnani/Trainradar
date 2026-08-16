@@ -1,3 +1,4 @@
+import '../css/Traininfo.css'
 export default function TrainInfo({ train, journey, onClose }) {
   if (!train) return null
 

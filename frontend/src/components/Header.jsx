@@ -1,3 +1,5 @@
+import '../css/Header.css'
+
 export default function Header({ theme, onToggleTheme, updatedAt, error, stale }) {
   let statusDef = 'loading...'
   let statusLevel = 'status'

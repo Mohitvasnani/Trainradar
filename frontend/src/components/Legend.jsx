@@ -1,3 +1,5 @@
+import '../css/Legend.css'
+
 export default function Legend() {
   return (
     <div className="legend">

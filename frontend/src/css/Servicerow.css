@@ -1,0 +1,70 @@
+.service-row {
+  display: block;
+  width: 100%;
+  padding: 11px 16px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border);
+  box-sizing: border-box;
+}
+
+.service-row:hover { background: var(--panel-hover); }
+
+.service-row.is-selected {
+  background: var(--accent);
+  color: #fff;
+}
+
+.service-row.is-selected .row-sub,
+.service-row.is-selected .muted,
+.service-row.is-selected .ontime,
+.service-row.is-selected .late { color: rgba(255, 255, 255, 0.8); }
+
+.service-row.is-stale { opacity: 0.55; }
+
+.row-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  margin-bottom: 3px;
+  gap: 8px;
+}
+
+.headcode {
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.row-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.row-route {
+  font-size: 14px;
+  line-height: 1.35;
+  overflow-wrap: break-word;
+}
+
+.row-sub {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 3px;
+  overflow-wrap: break-word;
+}
+
+.pin-btn {
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--border);
+  font-size: 14px;
+  padding: 0;
+  line-height: 1;
+}
+
+.pin-btn:hover { color: var(--muted); }
+.pin-btn.is-pinned { color: var(--late); }
+.service-row.is-selected .pin-btn.is-pinned { color: #ffd579; }

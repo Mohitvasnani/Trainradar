@@ -1,0 +1,35 @@
+.header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 18px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+}
+
+.brand {
+  font-weight: 600;
+  font-size: 18px;
+  letter-spacing: -0.01em;
+}
+
+.status {
+  margin-left: auto;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.status-error { color: var(--cancelled); }
+.status-stale { color: var(--late); }
+
+.theme-btn {
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 13px;
+}
+
+.theme-btn:hover { background: var(--panel-hover); }

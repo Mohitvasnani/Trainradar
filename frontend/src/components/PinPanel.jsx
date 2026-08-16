@@ -1,3 +1,5 @@
+import '../css/Pinpanel.css'
+
 export default function PinPanel({ trains, pinnedUids, journeys, onUnpin, onSelect }) {
   if (pinnedUids.length === 0) {
     return null

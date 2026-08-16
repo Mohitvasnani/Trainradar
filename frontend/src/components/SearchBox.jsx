@@ -1,3 +1,4 @@
+import '../css/Searchbox.css'
 export default function SearchBox({ from, to, text, onChange }) {
   const hasAny = from || to || text
 

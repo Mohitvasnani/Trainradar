@@ -1,5 +1,6 @@
 import ServiceRow from './ServiceRow'
 import SearchBox from './SearchBox'
+import '../css/Sidebar.css'
 
 export default function Sidebar({ trains, selectedUid, onSelect, search, onSearchChange, onTogglePin, pinnedUids }) {
   const hasSearch = search.from || search.to || search.text

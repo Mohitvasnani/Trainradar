@@ -1,3 +1,4 @@
+import '../css/Servicerow.css'
 export default function ServiceRow({ train, selected, onSelect, pinned, onTogglePin }) {
     const late = train.latenessMinutes
     const isLiveTrain = train.lat != null

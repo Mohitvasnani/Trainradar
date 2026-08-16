@@ -1,3 +1,4 @@
+
 .app {
   height: 100vh;
   display: flex;
@@ -17,6 +18,8 @@
   --accent: #4da3ff;
   --ontime: #4caf7d;
   --late: #e0a030;
+  --cancelled: #b3372a;
+  --shadow: rgba(0, 0, 0, 0.4);
 }
 
 .app[data-theme="light"] {
@@ -29,10 +32,6 @@
   --accent: #0066cc;
   --ontime: #2e7d52;
   --late: #b57314;
-}
-
-.body {
-  flex: 1;
-  display: flex;
-  min-height: 0;   
+  --cancelled: #a12c20;
+  --shadow: rgba(0, 0, 0, 0.15);
 }
