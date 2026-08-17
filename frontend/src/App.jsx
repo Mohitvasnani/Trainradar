@@ -29,6 +29,18 @@ export default function App() {
     if (to && !(train.destination || '').toLowerCase().includes(to)) {
       return false
     }
+    if (from) {
+      const inOrigin = (train.origin || '').toLowerCase().includes(from)
+      let inCalling = false
+      for (const p of train.callingPoints || []) {
+        if (p.toLowerCase().includes(from)) {
+          inCalling = true
+        }
+      }
+      if (!inOrigin && !inCalling) {
+        return false
+      }
+    }
     if (text) {
       const fields = [train.headcode, train.operator, train.uid]
       let found = false
@@ -45,6 +57,9 @@ export default function App() {
   }
 
   const filtered = trains.filter(matches)
+  
+
+  
 
   return (
     <div className="app" data-theme={theme}>
