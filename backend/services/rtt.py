@@ -32,9 +32,9 @@ G = load_rail_graph()
 print(f"Graph ready: {len(G.nodes)} nodes")
 
 
-# ---------------------------------------------------------------------------
+
 # RTT access token management
-# ---------------------------------------------------------------------------
+
 _token = None
 _token_expiry = None
 
@@ -50,12 +50,12 @@ def get_token():
     return _token
 
 
-# ---------------------------------------------------------------------------
+
 # Caches
 #   board   -> short TTL, changes as services come and go
 #   service -> longer TTL, calling point schedules barely move
 #   route   -> permanent, track geometry never changes
-# ---------------------------------------------------------------------------
+
 _board_cache = {}
 BOARD_TTL = 120
 
@@ -136,9 +136,8 @@ def route_cache_size():
     return len(_route_cache)
 
 
-# ---------------------------------------------------------------------------
 # Estimation
-# ---------------------------------------------------------------------------
+
 def is_possibly_running(svc, now):
     """Cheap pre-filter using only board data. Costs no API call."""
     temporal = svc.get("temporalData", {})
@@ -164,6 +163,12 @@ def estimate_train(svc, token, run_date, now):
     meta = svc.get("scheduleMetadata", {})
     identity = meta.get("identity")
     service = get_service_cached(token, identity, run_date)
+    locations = service.get("service", {}).get("locations", [])
+    calling = []
+    for loc in locations:
+        name = loc.get("location", {}).get("description")
+        if name:
+            calling.append(name)
 
     leg = find_live_leg(service, now)
     if leg is None:
@@ -205,6 +210,7 @@ def estimate_train(svc, token, run_date, now):
         "isEstimate": True,
         "origin": origin,
         "destination": destination,
+        "callingPoints": calling,
     }
 
 

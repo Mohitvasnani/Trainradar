@@ -33,7 +33,6 @@ if __name__ == "__main__":
 
     print(f"Scanning {len(services)} services for one running right now...\n")
 
-    # --- Scan services to find one that's mid-journey ---
     live = None
     for s in services:
         identity = s["scheduleMetadata"]["identity"]
@@ -54,7 +53,6 @@ if __name__ == "__main__":
 
     identity, (a, b) = live
 
-    # --- Route the real track between the two stations ---
     coords = load_station_coords()
     if a["crs"] not in coords or b["crs"] not in coords:
         print("A station on this leg has no coordinate; skipping plot.")
@@ -73,14 +71,14 @@ if __name__ == "__main__":
         print("No track route found between these stations on the graph.")
         raise SystemExit
 
-    # --- Build the curvy track that follows the real rails ---
+
     track = build_route_track(G, route)
 
     # --- Estimate live position ---
     pos = estimate_position(track, a["departure"], b["arrival"], now)
     print(f"Estimated live position: lat {pos.y}, lon {pos.x}")
 
-    # --- Plot ---
+  
     m = folium.Map(location=[a_lat, a_lon], zoom_start=13)
     folium.PolyLine([(lat, lon) for lon, lat in track.coords],
                     color="green", weight=4).add_to(m)

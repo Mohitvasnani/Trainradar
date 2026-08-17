@@ -8,7 +8,7 @@ from geopy.distance import geodesic
 from osm_graph import load_rail_graph
 from stations import load_station_coords
 from route_leg import route_leg
-from distances import track_length_km, straight_line_km
+from backend.script.distances import track_length_km, straight_line_km
 
 G = load_rail_graph()
 coords = load_station_coords()
