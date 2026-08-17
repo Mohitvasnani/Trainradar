@@ -76,4 +76,5 @@
   color: var(--muted);
   font-size: 11px;
 }
+.info-loading { color: var(--muted); font-size: 12px; margin-bottom: 8px; }
  

@@ -1,7 +1,3 @@
-from datetime import datetime
-from shapely.geometry import LineString
-
-
 def estimate_position(track, departed, due, now):
     """
     Estimate where a train is along a track.
@@ -13,8 +9,14 @@ def estimate_position(track, departed, due, now):
 
     Returns a Shapely Point at the estimated position.
     """
- 
     total_time = (due - departed).total_seconds()
+
+    # RTT reports whole minutes, so closely-spaced stations can share a
+    # timestamp. There is no interval to interpolate across, so place the
+    # train at the far end.
+    if total_time <= 0:
+        return track.interpolate(1.0, normalized=True)
+
     elapsed = (now - departed).total_seconds()
     fraction = elapsed / total_time
 
@@ -23,5 +25,4 @@ def estimate_position(track, departed, due, now):
     if fraction > 1:
         fraction = 1.0
 
-    position = track.interpolate(fraction, normalized=True)
-    return position
+    return track.interpolate(fraction, normalized=True)

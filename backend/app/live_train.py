@@ -10,18 +10,11 @@ from rtt_client import get_access_token, get_location_board, get_service
 from stations import load_station_coords
 from osm_graph import load_rail_graph
 from estimate import estimate_position
-from find_current_leg import get_leg_times
+from find_current_leg import get_leg_times, find_live_leg
 
 
-def find_live_leg(service, now):
-    """Return (a, b) for the leg this service is on now, or None."""
-    locations = service.get("service", {}).get("locations", [])
-    legs = [get_leg_times(loc) for loc in locations]
-    for i in range(len(legs) - 1):
-        a, b = legs[i], legs[i + 1]
-        if a["departure"] and b["arrival"] and a["departure"] <= now <= b["arrival"]:
-            return a, b
-    return None
+
+
 
 
 if __name__ == "__main__":

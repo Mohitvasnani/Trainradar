@@ -19,6 +19,16 @@ def get_leg_times(loc):
         "departure": pick("departure"),
     }
 
+def find_live_leg(service, now):
+    """Return (a, b) for the leg this service is on now, or None."""
+    locations = service.get("service", {}).get("locations", [])
+    legs = [get_leg_times(loc) for loc in locations]
+    for i in range(len(legs) - 1):
+        a, b = legs[i], legs[i + 1]
+        if a["departure"] and b["arrival"] and a["departure"] <= now <= b["arrival"]:
+            return a, b
+    return None
+
 
 if __name__ == "__main__":
     token, _ = get_access_token()

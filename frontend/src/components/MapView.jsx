@@ -11,6 +11,8 @@ import TrainInfo from "./TrainInfo";
 
 
 
+
+
 const LAYERS = {
   dark: {
     label: 'Dark',
@@ -47,10 +49,11 @@ export default function MapView({trains,  selectedUid, onSelect, pinnedJourneys}
     const selectedTrain=trains.find(
         t=>t.uid === selectedUid
     )
-    const journey = useJourney(selectedTrain)
+    const { journey, loading } = useJourney(selectedTrain)
    
     const [layer, setLayer] = useState('dark')
   const tiles = LAYERS[layer]
+  
   const all = allLegs()
     return(
     
@@ -149,7 +152,7 @@ export default function MapView({trains,  selectedUid, onSelect, pinnedJourneys}
          
       
       </MapContainer>
-      <TrainInfo train={selectedTrain} journey={journey} onClose={() => onSelect(null)} />
+     <TrainInfo train={selectedTrain} journey={journey} loading={loading} onClose={() => onSelect(null)} />
         <Legend />
     </div>
     )

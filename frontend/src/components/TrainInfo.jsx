@@ -14,7 +14,9 @@ export default function TrainInfo({ train, journey, onClose }) {
         {train.isEstimate && <span className="info-est">est.</span>}
       </div>
 
-      <div className="info-route">{train.origin} → {train.destination}</div>
+      <div className="info-route">
+        {loading && <div className="info-loading">Loading route…</div>}
+        {train.origin} → {train.destination}</div>
       <div className="info-operator">{train.operator}</div>
 
       <div className="info-status">

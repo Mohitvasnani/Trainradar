@@ -41,17 +41,6 @@ def get_service(access_token, identity, departure_date):
     resp.raise_for_status()
     return resp.json()
 
-
-def get_stops(access_token):
-    """Fetch RTT's reference list of stops."""
-    resp = requests.get(
-        f"{BASE_URL}/data/stops",
-        headers={"Authorization": f"Bearer {access_token}"},
-    )
-    resp.raise_for_status()
-    return resp.json()
-
-
 if __name__ == "__main__":
     from datetime import date
 
