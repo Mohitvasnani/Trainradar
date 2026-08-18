@@ -1,5 +1,5 @@
 import '../css/Traininfo.css'
-export default function TrainInfo({ train, journey, onClose }) {
+export default function TrainInfo({ train, journey, loading, onClose }) {
   if (!train) return null
 
   const late = train.latenessMinutes
