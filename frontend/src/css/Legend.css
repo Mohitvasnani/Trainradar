@@ -51,3 +51,7 @@
   max-width: 150px;
   line-height: 1.4;
 }
+
+@media (max-width: 768px) {
+  .legend { display: none; }
+}

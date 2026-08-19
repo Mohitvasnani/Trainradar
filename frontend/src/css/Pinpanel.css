@@ -62,3 +62,7 @@
 }
 
 .pinned-remove:hover { color: var(--text); }
+
+@media (max-width: 768px) {
+  .pinned-panel { display: none; }
+}

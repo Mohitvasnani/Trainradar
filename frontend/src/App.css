@@ -21,4 +21,23 @@
 .ontime { color: var(--ontime); }
 .late { color: var(--late); }
 .muted { color: var(--muted); }
+
+@media (max-width: 768px) {
+  .body {
+    flex-direction: column;
+  }
+
+  .map-wrap {
+    flex: none;
+    height: 55vh;
+  }
+
+  .sidebar {
+    width: 100%;
+    min-width: 0;
+    border-right: none;
+    border-top: 1px solid var(--border);
+    flex: 1;
+  }
+}
  
