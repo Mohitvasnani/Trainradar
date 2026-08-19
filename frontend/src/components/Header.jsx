@@ -16,6 +16,7 @@ export default function Header({ theme, onToggleTheme, updatedAt, error, stale }
   }
   return (
     <header className="header">
+          <img src="/logo.png" alt="" className="brand-logo" />
       <span className="brand">TrainRadar</span>
       <span className={statusLevel}>{statusDef}</span>
       <button className="theme-btn" onClick={onToggleTheme}>
