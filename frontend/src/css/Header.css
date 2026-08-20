@@ -33,3 +33,5 @@
 }
 
 .theme-btn:hover { background: var(--panel-hover); }
+.brand-logo { height: 22px; width: auto; display: block; }
+.header { gap: 10px; }
