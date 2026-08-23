@@ -9,16 +9,13 @@ def estimate_position(track, departed, due, now):
 
     Returns a Shapely Point at the estimated position.
     """
-    total_time = (due - departed).total_seconds()
+    total_time = (due-departed).total_seconds()
 
-    # RTT reports whole minutes, so closely-spaced stations can share a
-    # timestamp. There is no interval to interpolate across, so place the
-    # train at the far end.
     if total_time <= 0:
         return track.interpolate(1.0, normalized=True)
 
-    elapsed = (now - departed).total_seconds()
-    fraction = elapsed / total_time
+    elapsed =(now - departed).total_seconds()
+    fraction =elapsed/total_time
 
     if fraction < 0:
         fraction = 0.0
