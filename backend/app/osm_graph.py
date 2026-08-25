@@ -14,12 +14,12 @@ CACHE_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "rail_graph.g
 
 
 def load_rail_graph():
-    """Load the rail network. Use the cached file if it exists, else download and cache it."""
+  
     if os.path.exists(CACHE_PATH):
         print("Loading rail graph from cache...")
         return ox.load_graphml(CACHE_PATH)
 
-    print("No cache found — downloading rail graph from OpenStreetMap...")
+    print("no cache found sodownloading rail graph from osm")
     bbox = (WEST, SOUTH, EAST, NORTH)   # (left, bottom, right, top)
     G = ox.graph_from_bbox(
         bbox,
@@ -28,7 +28,7 @@ def load_rail_graph():
         simplify=False,
     )
 
-    # Save it so next time is instant
+   
     ox.save_graphml(G, CACHE_PATH)
     print(f"Graph downloaded and cached to {CACHE_PATH}")
     return G
