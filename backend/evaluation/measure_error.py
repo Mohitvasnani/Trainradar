@@ -1,34 +1,5 @@
 """
 TrainRadar estimation error measurement.
-
-Method
-------
-The live estimator places trains using SCHEDULED calling point times. Once a
-leg is complete, RTT reports the ACTUAL departure and arrival for that leg.
-
-For each completed leg we sample a set of times T between actual departure and
-actual arrival. At each T we compute two positions along the same routed track:
-
-    P_sched  = interpolate(track, scheduled_dep, scheduled_arr, T)
-    P_actual = interpolate(track, actual_dep,    actual_arr,    T)
-
-The geodesic distance between them is the error introduced by relying on the
-timetable rather than observed running. Both positions assume constant speed
-along the leg, so this measures schedule error specifically, NOT absolute
-positional truth. No public feed provides continuous positions to compare
-against.
-
-Legs are excluded when: either actual time is missing, RTT flags the calling
-point as interpolated, the pair is not routable on the OSM graph, or the leg
-duration is non-positive.
-
-Usage
------
-    python measure_error.py                  # sample today's MAN board
-    python measure_error.py --station LIV
-    python measure_error.py --max-services 25
-
-Writes error_results.csv in the working directory.
 """
 
 import argparse
@@ -38,7 +9,6 @@ import sys
 from datetime import datetime, date
 from pathlib import Path
 
-# Make the flat modules in app/ importable, same trick as server.py
 sys.path.insert(0, str(Path(__file__).parent / "app"))
 
 from rtt_client import get_access_token, get_location_board, get_service
@@ -48,12 +18,12 @@ from route_leg import route_leg
 from estimate import estimate_position
 
 
-SAMPLES_PER_LEG = 5      # how many points along each leg to evaluate
+SAMPLES_PER_LEG = 5
 EARTH_RADIUS_M = 6371000
 
 
 def haversine_m(lat1, lon1, lat2, lon2):
-    """Great-circle distance in metres between two lat/lon points."""
+    # Distance between two lat/lon points in meters
     p1, p2 = math.radians(lat1), math.radians(lat2)
     dp = math.radians(lat2 - lat1)
     dl = math.radians(lon2 - lon1)
@@ -66,12 +36,7 @@ def parse_time(value):
 
 
 def leg_endpoint(loc):
-    """
-    Extract both scheduled and actual times for one calling point.
-
-    Returns None when the location has no usable CRS code, so it can be
-    skipped rather than silently mismatched.
-    """
+    # Extract scheduled and actual times from one location
     location = loc.get("location", {})
     crs = (location.get("shortCodes") or [None])[0]
     if not crs:
@@ -95,19 +60,13 @@ def leg_endpoint(loc):
 
 
 def evaluate_leg(track, a, b):
-    """
-    Compare schedule-based and actual-based positions across one completed leg.
-
-    Yields one dict per sample point.
-    """
+    # Compare scheduled vs actual positions across one leg
     sched_dep, sched_arr = a["sched_dep"], b["sched_arr"]
     actual_dep, actual_arr = a["actual_dep"], b["actual_arr"]
 
     sched_secs = (sched_arr - sched_dep).total_seconds()
     actual_secs = (actual_arr - actual_dep).total_seconds()
 
-    # Sample evenly through the leg as it actually ran, skipping the endpoints
-    # where both methods agree by construction.
     for i in range(1, SAMPLES_PER_LEG + 1):
         fraction = i / (SAMPLES_PER_LEG + 1)
         sample_time = actual_dep + (actual_arr - actual_dep) * fraction
@@ -138,8 +97,7 @@ def evaluate_leg(track, a, b):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--station", default="MAN", help="CRS code of board to sample")
-    ap.add_argument("--max-services", type=int, default=20,
-                    help="how many services to fetch (each costs one API call)")
+    ap.add_argument("--max-services", type=int, default=20)
     ap.add_argument("--out", default="error_results.csv")
     args = ap.parse_args()
 
@@ -223,8 +181,7 @@ def main():
         print(f"  {identity}: {used_here} legs evaluated")
 
     if not rows:
-        print("\nNo evaluable legs found. Try again later in the day, when more "
-              "services have completed legs with reported actual times.")
+        print("\nNo evaluable legs found.")
         return
 
     fieldnames = ["uid", "run_date", "leg_from", "leg_to", "leg_from_name",

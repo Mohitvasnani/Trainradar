@@ -11,65 +11,95 @@ import './theme.css'
 import './App.css'
 
 export default function App() {
+  // State for theme, selected train, and search filters
   const [theme, setTheme] = useState('dark')
   const [selectedUid, setSelectedUid] = useState(null)
   const [search, setSearch] = useState({ from: '', to: '', text: '' })
 
-  const { trains, updatedAt, error, stale } = useTrains()
-  const { pinnedUids, togglePin, journeys, notifications, dismiss } = usePin(trains)
+  
+  const trainsData = useTrains()
+  const trains = trainsData.trains
+  const updatedAt = trainsData.updatedAt
+  const error = trainsData.error
+  const stale = trainsData.stale
 
-  function matches(train) {
-    const from = search.from.trim().toLowerCase()
-    const to = search.to.trim().toLowerCase()
-    const text = search.text.trim().toLowerCase()
+  
+  const pinData = usePin(trains)
+  const pinnedUids = pinData.pinnedUids
+  const journeys = pinData.journeys
+  const notifications = pinData.notifications
 
-    if (from && !(train.origin || '').toLowerCase().includes(from)) {
-      return false
-    }
-    if (to && !(train.destination || '').toLowerCase().includes(to)) {
-      return false
-    }
-    if (from) {
-      const inOrigin = (train.origin || '').toLowerCase().includes(from)
-      let inCalling = false
-      for (const p of train.callingPoints || []) {
-        if (p.toLowerCase().includes(from)) {
-          inCalling = true
+  
+  const filtered = trains.filter(function(train) {
+    
+    const fromSearch = search.from.toLowerCase()
+    const toSearch = search.to.toLowerCase()
+    const textSearch = search.text.toLowerCase()
+
+    
+    if (fromSearch !== '') {
+      const trainOrigin = train.origin ? train.origin.toLowerCase() : ''
+      const trainCallingPoints = train.callingPoints || []
+      
+      let matchesFrom = trainOrigin.includes(fromSearch)
+      
+   
+      if (!matchesFrom) {
+        for (let i = 0; i < trainCallingPoints.length; i++) {
+          if (trainCallingPoints[i].toLowerCase().includes(fromSearch)) {
+            matchesFrom = true
+            break
+          }
         }
       }
-      if (!inOrigin && !inCalling) {
+      
+    
+      if (!matchesFrom) {
         return false
       }
     }
-    if (text) {
-      const fields = [train.headcode, train.operator, train.uid]
-      let found = false
-      for (const f of fields) {
-        if (f && f.toLowerCase().includes(text)) {
-          found = true
-        }
-      }
-      if (!found) {
+
+    
+    if (toSearch !== '') {
+      const trainDestination = train.destination ? train.destination.toLowerCase() : ''
+      if (!trainDestination.includes(toSearch)) {
         return false
       }
     }
-    return true
-  }
 
-  const filtered = trains.filter(matches)
-  
+    
+    if (textSearch !== '') {
+      const trainHeadcode = train.headcode ? train.headcode.toLowerCase() : ''
+      const trainOperator = train.operator ? train.operator.toLowerCase() : ''
+      const trainUid = train.uid ? train.uid.toLowerCase() : ''
+      
+      const matchesText = trainHeadcode.includes(textSearch) || 
+                         trainOperator.includes(textSearch) || 
+                         trainUid.includes(textSearch)
+      
+      if (!matchesText) {
+        return false
+      }
+    }    
+    return true})
 
   
+  function handleThemeToggle() {
+    if (theme === 'dark') {
+      setTheme('light')
+    } else {
+      setTheme('dark')
+    }}
 
   return (
     <div className="app" data-theme={theme}>
       <Header
         theme={theme}
-        onToggleTheme={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+        onToggleTheme={handleThemeToggle}
         updatedAt={updatedAt}
         stale={stale}
-        error={error}
-      />
+        error={error}/> 
+        
       <div className="body">
         <Sidebar
           trains={filtered}
@@ -78,7 +108,7 @@ export default function App() {
           search={search}
           onSearchChange={setSearch}
           pinnedUids={pinnedUids}
-          onTogglePin={togglePin}
+          onTogglePin={pinData.togglePin}
         />
         <MapView
           trains={trains}
@@ -93,10 +123,10 @@ export default function App() {
         trains={trains}
         pinnedUids={pinnedUids}
         journeys={journeys}
-        onUnpin={togglePin}
+        onUnpin={pinData.togglePin}
         onSelect={setSelectedUid}
       />
-      <Notify items={notifications} onDismiss={dismiss} />
+      <Notify items={notifications} onDismiss={pinData.dismiss} />
     </div>
   )
 }

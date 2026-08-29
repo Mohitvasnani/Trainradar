@@ -6,26 +6,28 @@ from geopy.distance import geodesic
 def route_leg(G, coords, crs_a, crs_b, max_snap_m=300):
     
     if crs_a not in coords or crs_b not in coords:
-        return None, None, None
+        return None,None,None
 
     a_lat, a_lon = coords[crs_a]
     b_lat, b_lon = coords[crs_b]
-
     a_node = ox.distance.nearest_nodes(G, a_lon, a_lat)
     b_node = ox.distance.nearest_nodes(G, b_lon, b_lat)
 
     
     a_snap = geodesic((a_lat, a_lon),
-                      (G.nodes[a_node]["y"], G.nodes[a_node]["x"])).m
-    b_snap = geodesic((b_lat, b_lon),
-                      (G.nodes[b_node]["y"], G.nodes[b_node]["x"])).m
+                      (G.nodes[a_node]["y"],
+                       G.nodes[a_node]["x"]
+                       )).m
+    b_snap =geodesic((b_lat, b_lon),
+                      (G.nodes[b_node]["y"],
+                        G.nodes[b_node]["x"])).m
 
 
     if a_snap > max_snap_m or b_snap > max_snap_m:
-        return None, a_snap, b_snap
+        return None,a_snap, b_snap
 
     
-    route = ox.shortest_path(G, a_node, b_node, weight="length")
+    route =ox.shortest_path(G, a_node, b_node, weight="length")
     if not route or len(route) < 2:
         return None, a_snap, b_snap
 

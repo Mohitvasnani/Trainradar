@@ -6,87 +6,133 @@ export function usePin(trains, intervalMs = 60000) {
   const [pinnedUids, setPinnedUids] = useState([])
   const [journeys, setJourneys] = useState({})
   const [notifications, setNotifications] = useState([])
-  const previous = useRef({})
+  const previousJourneys = useRef({})
 
+  
   function togglePin(uid) {
-    setPinnedUids(current => {
-      if (current.includes(uid)) {
-        return current.filter(u => u !== uid)
+    setPinnedUids(function(currentPins) {
+      
+      if (currentPins.includes(uid)) {
+        return currentPins.filter(function(pinnedUid) {
+          return pinnedUid !== uid
+        })
       }
-      if (current.length >= MAX_PINNED) {
-        return [current[1], uid]
+      
+   
+      if (currentPins.length >= MAX_PINNED) {
+        return [currentPins[1], uid]
       }
-      return [...current, uid]
+      
+      
+      return [...currentPins, uid]
     })
   }
 
-  function dismiss(id) {
-    setNotifications(current => current.filter(n => n.id !== id))
+  // Remove a notification
+  function dismiss(notificationId) {
+    setNotifications(function(currentNotifications) {
+      return currentNotifications.filter(function(notification) {
+        return notification.id !== notificationId
+      })
+    })
   }
 
-  useEffect(() => {
+  useEffect(function() {
+    
     if (pinnedUids.length === 0) {
       setJourneys({})
-      previous.current = {}
+      previousJourneys.current = {}
       return
     }
 
-    let cancelled = false
+    let isCancelled = false
 
-    async function load() {
-      const next = {}
-      const fresh = []
+    
+    async function loadJourneys() {
+      const newJourneys = {}
+      const newNotifications = []
 
-      for (const uid of pinnedUids) {
-        const train = trains.find(t => t.uid === uid)
+      for (let i = 0; i < pinnedUids.length; i++) {
+        const uid = pinnedUids[i]
+        
+        
+        const train = trains.find(function(t) {
+          return t.uid === uid
+        })
+        
+        
         if (!train || !train.runDate) {
           continue
         }
+        
         try {
-          const res = await fetch(
-            `http://127.0.0.1:5000/api/journey/${uid}/${train.runDate}`
+          const response = await fetch(
+            'http://127.0.0.1:5000/api/journey/' + uid + '/' + train.runDate
           )
-          if (!res.ok) {
+          
+          if (!response.ok) {
             continue
           }
-          const data = await res.json()
-          next[uid] = data
-
-          const before = previous.current[uid]
-          if (before) {
-            for (const stop of data.stops) {
-              const was = before.stops.find(s => s.crs === stop.crs)
-              if (was && !was.passed && stop.passed) {
-                fresh.push({
-                  id: `${uid}-${stop.crs}-${Date.now()}`,
+          
+          const journeyData = await response.json()
+          newJourneys[uid] = journeyData
+          
+          
+          const oldJourney = previousJourneys.current[uid]
+          if (oldJourney) {
+            for (let j = 0; j < journeyData.stops.length; j++) {
+              const stop = journeyData.stops[j]
+              
+             
+              const oldStop = oldJourney.stops.find(function(s) {
+                return s.crs === stop.crs
+              })
+              
+    
+              if (oldStop && !oldStop.passed && stop.passed) {
+                newNotifications.push({
+                  id: uid + '-' + stop.crs + '-' + Date.now(),
                   headcode: train.headcode || uid,
-                  text: `Reported at ${stop.name}`,
+                  text: 'Reported at ' + stop.name,
                 })
               }
             }
           }
-        } catch {
-          // leave this journey as-is on failure
+        } catch (error) {
+          // skip
         }
       }
 
-      if (cancelled) {
+      if (isCancelled) {
         return
       }
-      previous.current = next
-      setJourneys(next)
-      if (fresh.length > 0) {
-        setNotifications(current => [...current, ...fresh])
+      
+      previousJourneys.current = newJourneys
+      setJourneys(newJourneys)
+      
+      if (newNotifications.length > 0) {
+        setNotifications(function(currentNotifications) {
+          return currentNotifications.concat(newNotifications)
+        })
       }
     }
 
-    load()
-    const id = setInterval(load, intervalMs)
-    return () => {
-      cancelled = true
-      clearInterval(id)
+    
+    loadJourneys()
+    const intervalId = setInterval(loadJourneys, intervalMs)
+    
+    
+    return function cleanup() {
+      isCancelled = true
+      clearInterval(intervalId)
     }
   }, [pinnedUids.join(','), intervalMs])
 
-  return { pinnedUids, togglePin, journeys, notifications, dismiss }
+  return { 
+    pinnedUids, 
+    togglePin, 
+    journeys, 
+    notifications, 
+    dismiss 
+  }
 }

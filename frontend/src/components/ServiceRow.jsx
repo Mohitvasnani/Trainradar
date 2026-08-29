@@ -1,44 +1,74 @@
 import '../css/Servicerow.css'
+
 export default function ServiceRow({ train, selected, onSelect, pinned, onTogglePin }) {
-    const late = train.latenessMinutes
-    const isLiveTrain = train.lat != null
-    const nextTrain = train.legTo && train.legTo !== train.destination
+  const late = train.latenessMinutes
+  const isLiveTrain = train.lat != null
+  
+  
+  let hasNextStation = false
+  if (train.legTo && train.legTo !== train.destination) {
+    hasNextStation = true
+  }
 
-    return (
-        <div
-            className={`service-row ${selected ? 'is-selected' : ''} ${isLiveTrain ? '' : 'is-stale'}`}
-            onClick={() => onSelect(train.uid)}
-            role="button"
-            tabIndex={0}
-        >
-            <div className="row-top">
-                <span className="headcode">{train.headcode || train.uid}</span>
-                <span className="row-right">
-                    {!isLiveTrain
-                        ? <span className="muted">no live data</span>
-                        : late > 0
-                            ? <span className="late">+{late} min</span>
-                            : late < 0
-                                ? <span className="ontime">{late} min early</span>
-                                : <span className="ontime">on time</span>}
-                    <button
-                        className={`pin-btn ${pinned ? 'is-pinned' : ''}`}
-                        onClick={e => { e.stopPropagation(); onTogglePin(train.uid) }}
-                        aria-label={pinned ? 'Unpin train' : 'Pin train'}
-                    >
-                        ★
-                    </button>
-                </span>
-            </div>
+  
+  let statusText
+  let statusClass
+  
+  if (!isLiveTrain) {
+    statusText = 'no live data'
+    statusClass = 'muted'
+  } else if (late > 0) {
+    statusText = '+' + late + ' min'
+    statusClass = 'late'
+  } else if (late < 0) {
+    statusText = late + ' min early'
+    statusClass = 'ontime'
+  } else {
+    statusText = 'on time'
+    statusClass = 'ontime'
+  }
 
-            <div className="row-route">
-                {train.origin} → {train.destination}
-            </div>
+  // Build class names
+  let rowClass = 'service-row'
+  if (selected) {
+    rowClass += ' is-selected'
+  }
+  if (!isLiveTrain) {
+    rowClass += ' is-stale'
+  }
 
-            <div className="row-sub">
-                {train.operator}
-                {nextTrain && ` → next ${train.legTo}`}
-            </div>
-        </div>
-    )
+  return (
+    <div
+      className={rowClass}
+      onClick={() => onSelect(train.uid)}
+      role="button"
+      tabIndex={0}
+    >
+      <div className="row-top">
+        <span className="headcode">{train.headcode || train.uid}</span>
+        <span className="row-right">
+          <span className={statusClass}>{statusText}</span>
+          <button
+            className={pinned ? 'pin-btn is-pinned' : 'pin-btn'}
+            onClick={function(e) {
+              e.stopPropagation()
+              onTogglePin(train.uid)
+            }}
+            aria-label={pinned ? 'Unpin train' : 'Pin train'}
+          >
+            ★
+          </button>
+        </span>
+      </div>
+
+      <div className="row-route">
+        {train.origin} → {train.destination}
+      </div>
+
+      <div className="row-sub">
+        {train.operator}
+        {hasNextStation && ' → next ' + train.legTo}
+      </div>
+    </div>
+  )
 }

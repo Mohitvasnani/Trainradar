@@ -13,10 +13,6 @@ from estimate import estimate_position
 from find_current_leg import get_leg_times, find_live_leg
 
 
-
-
-
-
 if __name__ == "__main__":
     token, _ = get_access_token()
     board = get_location_board(token, code="MAN")
@@ -26,6 +22,7 @@ if __name__ == "__main__":
 
     print(f"Scanning {len(services)} services for one running right now...\n")
 
+    # Find a live service
     live = None
     for s in services:
         identity = s["scheduleMetadata"]["identity"]
@@ -40,15 +37,14 @@ if __name__ == "__main__":
             break
 
     if not live:
-        print("No services at LIV are mid-journey at this exact moment.")
-        print("This is normal off-peak — try a busier station or time.")
+        print("No services mid-journey right now.")
         raise SystemExit
 
     identity, (a, b) = live
 
     coords = load_station_coords()
     if a["crs"] not in coords or b["crs"] not in coords:
-        print("A station on this leg has no coordinate; skipping plot.")
+        print("Station has no coordinate, skipping plot.")
         raise SystemExit
 
     a_lat, a_lon = coords[a["crs"]]
@@ -61,17 +57,16 @@ if __name__ == "__main__":
     route = ox.shortest_path(G, a_node, b_node, weight="length")
 
     if not route:
-        print("No track route found between these stations on the graph.")
+        print("No track route found.")
         raise SystemExit
-
 
     track = build_route_track(G, route)
 
-    # --- Estimate live position ---
+    # Estimate live position
     pos = estimate_position(track, a["departure"], b["arrival"], now)
     print(f"Estimated live position: lat {pos.y}, lon {pos.x}")
 
-  
+    # Plot map
     m = folium.Map(location=[a_lat, a_lon], zoom_start=13)
     folium.PolyLine([(lat, lon) for lon, lat in track.coords],
                     color="green", weight=4).add_to(m)
@@ -82,5 +77,5 @@ if __name__ == "__main__":
 
     out = "live_train.html"
     m.save(out)
-    print(f"Saved {out} — opening")
+    print(f"Saved {out}")
     webbrowser.open(out)

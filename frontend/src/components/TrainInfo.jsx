@@ -1,9 +1,36 @@
 import '../css/Traininfo.css'
+
 export default function TrainInfo({ train, journey, loading, onClose }) {
   if (!train) return null
 
   const late = train.latenessMinutes
-  const nextStop = journey?.stops.find(s => !s.passed)
+  
+  let nextStop = null
+  if (journey && journey.stops) {
+    for (let i = 0; i < journey.stops.length; i++) {
+      if (!journey.stops[i].passed) {
+        nextStop = journey.stops[i]
+        break
+      }
+    }
+  }
+
+  let statusText
+  let statusClass
+  
+  if (late == null) {
+    statusText = 'No live report'
+    statusClass = 'muted'
+  } else if (late > 0) {
+    statusText = late + ' min late'
+    statusClass = 'late'
+  } else if (late < 0) {
+    statusText = Math.abs(late) + ' min early'
+    statusClass = 'ontime'
+  } else {
+    statusText = 'On time'
+    statusClass = 'ontime'
+  }
 
   return (
     <div className="train-info">
@@ -16,17 +43,13 @@ export default function TrainInfo({ train, journey, loading, onClose }) {
 
       <div className="info-route">
         {loading && <div className="info-loading">Loading route…</div>}
-        {train.origin} → {train.destination}</div>
+        {train.origin} → {train.destination}
+      </div>
+      
       <div className="info-operator">{train.operator}</div>
 
       <div className="info-status">
-        {late == null
-          ? <span className="muted">No live report</span>
-          : late > 0
-            ? <span className="late">{late} min late</span>
-            : late < 0
-              ? <span className="ontime">{Math.abs(late)} min early</span>
-              : <span className="ontime">On time</span>}
+        <span className={statusClass}>{statusText}</span>
       </div>
 
       <div className="info-position">
@@ -36,8 +59,8 @@ export default function TrainInfo({ train, journey, loading, onClose }) {
       {nextStop && (
         <div className="info-next">
           Next stop {nextStop.name}
-          {nextStop.schedArr && ` · due ${new Date(nextStop.schedArr)
-            .toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
+          {nextStop.schedArr && ' · due ' + new Date(nextStop.schedArr)
+            .toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         </div>
       )}
 

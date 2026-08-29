@@ -27,7 +27,7 @@ SERVICE_TTL = 300
 
 
 def get_service_cached(token, identity, run_date):
-    # Same train ID is reused daily, so cache by (id, date)
+    
     key = (identity, run_date)
     hit = _service_cache.get(key)
     if hit and time.time() - hit[0] < SERVICE_TTL:
@@ -42,7 +42,7 @@ _route_cache = {}
 
 
 def get_route(crs_a, crs_b):
-    # Track geometry never changes, so cache forever
+    
     key = (crs_a, crs_b)
     if key not in _route_cache:
         track, snap_a, snap_b = route_leg(G, coords, crs_a, crs_b)

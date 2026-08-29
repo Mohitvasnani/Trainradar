@@ -37,14 +37,18 @@ function fmt(iso) {
   return new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 }
 
-function stopLatLon(journey, crs) {
-  const start = journey.legs.find(l => l.from === crs)
-  if (start) return start.coordinates[0]
-  const end = journey.legs.find(l => l.to === crs)
-  if (end) return end.coordinates[end.coordinates.length - 1]
+function getStopPosition(journey, crs) {
+  for (let i = 0; i < journey.legs.length; i++) {
+    const leg = journey.legs[i]
+    if (leg.from === crs) {
+      return leg.coordinates[0]
+    }
+    if (leg.to === crs) {
+      return leg.coordinates[leg.coordinates.length - 1]
+    }
+  }
   return null
 }
-
 export default function MapView({trains,  selectedUid, onSelect, pinnedJourneys}){
     const selectedTrain=trains.find(
         t=>t.uid === selectedUid
@@ -76,30 +80,43 @@ export default function MapView({trains,  selectedUid, onSelect, pinnedJourneys}
 
         <ZoomToTrain train={selectedTrain} />
 
-        {journey && journey.legs.map((leg, i) => (
-          <Polyline
-            key={`${leg.from}-${leg.to}-${i}`}
-            positions={leg.coordinates}
-            pathOptions={{
-              color: leg.passed ? '#4caf7d' : '#8a8a90',
-              weight: 4,
-              opacity: leg.passed ? 0.85 : 0.5,
-              dashArray: leg.passed ? null : '6 8',
-            }}
-          />
-        ))}
-        {pinnedJourneys && Object.entries(pinnedJourneys).map(([uid, j]) =>
-          j.legs.map((leg, i) => (
-            <Polyline
-              key={`pin-${uid}-${i}`}
-              positions={leg.coordinates}
-              pathOptions={{ color: '#e0a030', weight: 3, opacity: 0.5 }}
-            />
-          ))
-        )}
+        {journey && journey.legs.map((leg, i) => {
+  let lineColor = '#8a8a90'
+  let lineDash = '6 8'
+  let lineOpacity = 0.5
+  
+  if (leg.passed) {
+    lineColor = '#4caf7d'
+    lineDash = null
+    lineOpacity = 0.85
+  }
+  
+  return (
+    <Polyline
+      key={leg.from + '-' + leg.to + '-' + i}
+      positions={leg.coordinates}
+      pathOptions={{
+        color: lineColor,
+        weight: 4,
+        opacity: lineOpacity,
+        dashArray: lineDash,
+      }}
+    />
+  )
+})}
+        {pinnedJourneys && Object.keys(pinnedJourneys).map(uid => {
+  const journey = pinnedJourneys[uid]
+  return journey.legs.map((leg, i) => (
+    <Polyline
+      key={'pin-' + uid + '-' + i}
+      positions={leg.coordinates}
+      pathOptions={{ color: '#e0a030', weight: 3, opacity: 0.5 }}
+    />
+  ))
+})}
 
         {journey && journey.stops.map(stop => {
-          const latlon = stopLatLon(journey, stop.crs)
+          const latlon = getStopPosition(journey, stop.crs)
           if (!latlon) return null
           return (
             <CircleMarker
@@ -115,40 +132,52 @@ export default function MapView({trains,  selectedUid, onSelect, pinnedJourneys}
             >
               <Popup>
                 <strong>{stop.name}</strong><br />
-                {stop.isCancelled
-                  ? 'Not calling here'
-                  : stop.passed
-                    ? `Departed ${fmt(stop.actualDep || stop.actualArr)}`
-                    : `Due ${fmt(stop.schedArr || stop.schedDep)}`}
+                {stop.isCancelled && 'Not calling here'}
+{!stop.isCancelled && stop.passed && `Departed ${fmt(stop.actualDep || stop.actualArr)}`}
+{!stop.isCancelled && !stop.passed && `Due ${fmt(stop.schedArr || stop.schedDep)}`}
               </Popup>
             </CircleMarker>
           )
         })}
 
         {trains.map(train => {
-          const selected = train.uid === selectedUid
-          return (
-            <CircleMarker
-              key={train.uid}
-              center={[train.lat, train.lon]}
-              radius={selected ? 9 : 5}
-              eventHandlers={{ click: () => onSelect(train.uid) }}
-              pathOptions={{
-                color: selected ? '#4da3ff' : '#9a9aa0',
-                fillColor: selected ? '#4da3ff' : '#9a9aa0',
-                fillOpacity: selected ? 1 : 0.7,
-                weight: selected ? 3 : 1,
-              }}
-            >
-              <Popup>
-                <strong>{train.headcode || train.uid}</strong>{train.isEstimate && ' est'}<br />
-                {train.operator}<br />
-                between {train.legFrom} and {train.legTo}
-              </Popup>
-            </CircleMarker>
-          )
-        })}
-
+  const isSelected = train.uid === selectedUid
+  let markerColor = '#9a9aa0'
+  let markerRadius = 5
+  
+  if (isSelected) {
+    markerColor = '#4da3ff'
+    markerRadius = 9
+  }
+  
+  return (
+    <CircleMarker
+      key={train.uid}
+      center={[train.lat, train.lon]}
+      radius={markerRadius}
+      eventHandlers={{
+        click: function() {
+          onSelect(train.uid)
+        }
+      }}
+      pathOptions={{
+        color: markerColor,
+        fillColor: markerColor,
+        fillOpacity: isSelected ? 1 : 0.7,
+        weight: isSelected ? 3 : 1,
+      }}
+    >
+      <Popup>
+        <strong>{train.headcode || train.uid}</strong>
+        {train.isEstimate && ' est'}
+        <br />
+        {train.operator}
+        <br />
+        between {train.legFrom} and {train.legTo}
+      </Popup>
+    </CircleMarker>
+  )
+})}
          
       
       </MapContainer>

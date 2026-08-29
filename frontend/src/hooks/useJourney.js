@@ -1,32 +1,69 @@
 import { useState, useEffect } from 'react'
+
 export function useJourney(train) {
   const [journey, setJourney] = useState(null)
   const [loading, setLoading] = useState(false)
 
-  useEffect(() => {
+  useEffect(function() {
+    
     if (!train) {
       setJourney(null)
       setLoading(false)
       return
     }
 
+    
     const uid = train.uid
     const runDate = train.runDate
+    
+    
     if (!uid || !runDate) {
       setJourney(null)
+      setLoading(false)
       return
     }
 
-    let cancelled = false
+    let isCancelled = false
+    
+    
     setLoading(true)
 
-    fetch(`http://127.0.0.1:5000/api/journey/${uid}/${runDate}`)
-      .then(res => res.ok ? res.json() : Promise.reject(res.status))
-      .then(data => { if (!cancelled) setJourney(data) })
-      .catch(() => { if (!cancelled) setJourney(null) })
-      .finally(() => { if (!cancelled) setLoading(false) })
+    
+    const url = 'http://127.0.0.1:5000/api/journey/' + uid + '/' + runDate
 
-    return () => { cancelled = true }
+    
+    fetch(url)
+      .then(function(response) {
+        
+        if (response.ok) {
+          return response.json()
+        } else {
+          throw new Error('Failed to fetch journey')
+        }
+      })
+      .then(function(data) {
+        
+        if (!isCancelled) {
+          setJourney(data)
+        }
+      })
+      .catch(function(error) {
+       
+        if (!isCancelled) {
+          setJourney(null)
+        }
+      })
+      .finally(function() {
+        
+        if (!isCancelled) {
+          setLoading(false)
+        }
+      })
+
+    
+    return function cleanup() {
+      isCancelled = true
+    }
   }, [train?.uid, train?.runDate])
 
   return { journey, loading }

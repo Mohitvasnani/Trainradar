@@ -5,31 +5,43 @@ export function useTrains(intervalMs = 60000) {
   const [trains, setTrains] = useState([])
   const [updatedAt, setUpdatedAt] = useState(null)
   const [error, setError] = useState(null)
-  const  [stale, setStale]= useState(false)
+  const [stale, setStale] = useState(false)
 
   useEffect(() => {
-    let cancelled = false
-
-    const load = async () => {
+    
+    async function getTrains() {
       try {
-        const data = await fetchTrains()
-        if (cancelled) return
-        setTrains(data.trains)
+        const result = await fetchTrains()
+        setTrains(result.trains)
         setUpdatedAt(new Date())
         setError(null)
-        setStale(data.stale===true)
+        
+
+        if (result.stale === true) {
+          setStale(true)
+        } else {
+          setStale(false)
+        }
       } catch (err) {
-        if (!cancelled) setError(err.message)
+        setError(err.message)
       }
     }
 
-    load()
-    const id = setInterval(load, intervalMs)
-    return () => {
-      cancelled = true
-      clearInterval(id)
+    
+    getTrains()
+    
+    
+    const intervalId = setInterval(getTrains, intervalMs)
+    
+    
+    return function cleanup() {
+      clearInterval(intervalId)
     }
   }, [intervalMs])
 
-  return { trains, updatedAt, error, stale}
+  return {
+    trains, updatedAt, 
+    error, stale
+   }
+
 }

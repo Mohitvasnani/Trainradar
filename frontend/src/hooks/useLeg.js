@@ -1,50 +1,55 @@
-import {useState,useEffect} from 'react'
+import { useState, useEffect } from 'react'
 
-export function useLeg(train){
-    const [coords, setCoords]=useState(null)
+export function useLeg(train) {
+  const [coords, setCoords] = useState(null)
 
-    useEffect(() => {
-        if (!train) {
-            setCoords(null)
-            return
+  useEffect(function() {
+    
+    if (!train) {
+      setCoords(null)
+      return
+    }
+
+    
+    const fromStation = train.legFromCrs
+    const toStation = train.legToCrs
+
+    
+    if (!fromStation || !toStation) {
+      setCoords(null)
+      return
+    }
+
+    let isCancelled = false
+
+    
+    const url = 'http://127.0.0.1:5000/api/leg/' + fromStation + '/' + toStation
+
+    
+    fetch(url)
+      .then(function(response) {
+        if (response.ok) {
+          return response.json()
+        } else {
+          throw new Error('Failed to fetch leg')
         }
-        const from =train.legFromCrs
-        const to= train.legToCrs
-
-
-        if(!from||!to){
-            setCoords(null)
-            return
+      })
+      .then(function(data) {
+        if (!isCancelled) {
+          setCoords(data.coordinates)
         }
-        let cancelled = false
-        fetch(`http://127.0.0.1:5000/api/leg/${train.legFromCrs}/${train.legToCrs}`)
-        .then(res=>{
-            if (res.ok) {
-                return res.json()
-            } else {
-                return Promise.reject(res.status)
-            }
-        })
-        .then(
-            data=>{
-                if (!cancelled) {
-                    setCoords(data.coordinates)
-                }
-            }
-        )
-        .catch(
-            ()=> {
-                if (!cancelled) {
-                    setCoords(null)
-                }
+      })
+      .catch(function(error) {
+        if (!isCancelled) {
+          setCoords(null)
+        }
+      })
 
-            }
-        )
-        return () => {
-        cancelled = true}
-    }, [train?.legFromCrs, train?.legToCrs]
+    
+    return function cleanup() {
+      isCancelled = true
+    }
+  }, [train?.legFromCrs, train?.legToCrs])
 
-     
-)
-return coords
+  return coords
 }
