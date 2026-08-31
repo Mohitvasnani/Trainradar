@@ -9,7 +9,7 @@ import sys
 from datetime import datetime, date
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent / "app"))
+sys.path.insert(0, str(Path(__file__).parent.parent / "app"))
 
 from rtt_client import get_access_token, get_location_board, get_service
 from stations import load_station_coords
