@@ -12,12 +12,10 @@ export default function Sidebar({ trains, selectedUid, onSelect, search, onSearc
         from={search.from}
         to={search.to}
         text={search.text}
-        onChange={onSearchChange}
-      />
+        onChange={onSearchChange}/>
       <div className="sidebar-list">
         {trains.length === 0 && (
-          <p className="empty">{hasSearch ? 'No matching services' : 'No live services'}</p>
-        )}
+          <p className="empty">{hasSearch ? 'No matching services' : 'No live services'}</p>)}
         {trains.map(t => (
           <ServiceRow
             key={t.uid}
@@ -25,10 +23,8 @@ export default function Sidebar({ trains, selectedUid, onSelect, search, onSearc
             selected={t.uid === selectedUid}
             onSelect={onSelect}
             pinned={pinnedUids.includes(t.uid)}
-            onTogglePin={onTogglePin}
-          />
+            onTogglePin={onTogglePin}/>
         ))}
       </div>
-    </aside>
-  )
+    </aside>)
 }

@@ -28,7 +28,7 @@ export default function ServiceRow({ train, selected, onSelect, pinned, onToggle
     statusClass = 'ontime'
   }
 
-  // Build class names
+
   let rowClass = 'service-row'
   if (selected) {
     rowClass += ' is-selected'
@@ -40,10 +40,9 @@ export default function ServiceRow({ train, selected, onSelect, pinned, onToggle
   return (
     <div
       className={rowClass}
-      onClick={() => onSelect(train.uid)}
+      onClick={( )=>onSelect(train.uid)}
       role="button"
-      tabIndex={0}
-    >
+      tabIndex={0}>
       <div className="row-top">
         <span className="headcode">{train.headcode || train.uid}</span>
         <span className="row-right">
@@ -70,5 +69,4 @@ export default function ServiceRow({ train, selected, onSelect, pinned, onToggle
         {hasNextStation && ' → next ' + train.legTo}
       </div>
     </div>
-  )
-}
+  )}

@@ -3,18 +3,15 @@ import { useState, useEffect } from 'react'
 export function useLeg(train) {
   const [coords, setCoords] = useState(null)
 
-  useEffect(function() {
-    
+  useEffect(function () {
     if (!train) {
       setCoords(null)
       return
     }
 
-    
     const fromStation = train.legFromCrs
     const toStation = train.legToCrs
 
-    
     if (!fromStation || !toStation) {
       setCoords(null)
       return
@@ -22,30 +19,27 @@ export function useLeg(train) {
 
     let isCancelled = false
 
-    
     const url = 'http://127.0.0.1:5000/api/leg/' + fromStation + '/' + toStation
 
-    
     fetch(url)
-      .then(function(response) {
+      .then(function (response) {
         if (response.ok) {
           return response.json()
         } else {
           throw new Error('Failed to fetch leg')
         }
       })
-      .then(function(data) {
+      .then(function (data) {
         if (!isCancelled) {
           setCoords(data.coordinates)
         }
       })
-      .catch(function(error) {
+      .catch(function () {
         if (!isCancelled) {
           setCoords(null)
         }
       })
 
-    
     return function cleanup() {
       isCancelled = true
     }

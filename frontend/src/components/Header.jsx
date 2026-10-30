@@ -1,19 +1,19 @@
 import '../css/Header.css'
 
-export default function Header({ theme, onToggleTheme, updatedAt, error, stale }) {
-  let statusDef = 'loading...'
-  let statusLevel = 'status'
+export default function Header({ theme, 
+  onToggleTheme, 
+  updatedAt, 
+  error, stale }) {
+  let statusDef='loading'
+  let statusLevel ='status'
 
-  if (error) {
-    statusDef =`Error: ${error}`
+  if (error) {statusDef =`Error: ${error}`
     statusLevel='status status-error'
   } else if (stale) {
     statusDef =`showing last known positions`
     statusLevel='status status-stale'
   } else if (updatedAt) {
-    statusDef =`live --- updated ${updatedAt.toLocaleTimeString()}`
-    
-  }
+    statusDef =`live updated ${updatedAt.toLocaleTimeString()}`}
   return (
     <header className="header">
           <img src="/logo.png" alt="" className="brand-logo" />

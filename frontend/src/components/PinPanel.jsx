@@ -5,15 +5,14 @@ export default function PinPanel({ trains, pinnedUids, journeys, onUnpin, onSele
     return null
   }
 
-  return (
-    <div className="pinned-panel">
+  return (<div className="pinned-panel">
       <div className="pinned-title">Watching</div>
       {pinnedUids.map(uid => {
-        const train = trains.find(t => t.uid === uid)
+        const train = trains.find(t =>
+           t.uid=== uid)
         if (!train) {
-          return null
-        }
-        const journey = journeys[uid]
+          return null        }
+        const journey =journeys[uid]
         let nextStop = null
         if (journey) {
           nextStop = journey.stops.find(s => !s.passed)

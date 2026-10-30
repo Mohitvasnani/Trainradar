@@ -53,8 +53,7 @@ export function useJourney(train) {
           setJourney(null)
         }
       })
-      .finally(function() {
-        
+      .finally(function() {        
         if (!isCancelled) {
           setLoading(false)
         }

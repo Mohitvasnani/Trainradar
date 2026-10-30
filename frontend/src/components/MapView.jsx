@@ -1,34 +1,34 @@
-import { MapContainer, TileLayer,CircleMarker, Popup, Polyline} from 'react-leaflet'
+import { MapContainer, TileLayer, CircleMarker, Popup, Polyline } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 
-import  ZoomToTrain from './ZoomToTrain'
+import ZoomToTrain from './ZoomToTrain'
 import { useJourney } from '../hooks/useJourney'
-import {useState} from 'react'
+import { useState } from 'react'
 import Switcher from './Switcher'
 import { allLegs } from '../hooks/allLegs'
 import Legend from "./Legend";
 import TrainInfo from "./TrainInfo";
 
-
-
-
+const CARTO_API_KEY = 'cb1_33gh_1_ef35ef8db96579e92177048b'
 
 const LAYERS = {
-  dark: {
-    label: 'Dark',
-    url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
-    attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+  standard: {
+    label: 'Standard',
+    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    attribution: '&copy; OpenStreetMap contributors',
+    maxZoom: 19,
   },
   light: {
     label: 'Light',
-    url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
+    url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png?key=' + CARTO_API_KEY,
     attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+    maxZoom: 20,
   },
-  terrain: {
-    label: 'Terrain',
-    url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
-    attribution: '&copy; OpenStreetMap contributors, SRTM | &copy; OpenTopoMap (CC-BY-SA)',
-    maxZoom: 17,
+  dark: {
+    label: 'Dark',
+    url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png?key=' + CARTO_API_KEY,
+    attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+    maxZoom: 20,
   },
 }
 
@@ -49,27 +49,27 @@ function getStopPosition(journey, crs) {
   }
   return null
 }
-export default function MapView({trains,  selectedUid, onSelect, pinnedJourneys}){
-    const selectedTrain=trains.find(
-        t=>t.uid === selectedUid
-    )
-    const { journey, loading } = useJourney(selectedTrain)
-   
-    const [layer, setLayer] = useState('dark')
+
+export default function MapView({ trains, selectedUid, onSelect, pinnedJourneys }) {
+  const selectedTrain = trains.find(t => t.uid === selectedUid)
+  const { journey, loading } = useJourney(selectedTrain)
+
+  const [layer, setLayer] = useState('standard')
   const tiles = LAYERS[layer]
-  
+
   const all = allLegs()
-    return(
-    
+
+  return (
     <div className="map-wrap">
-     
-       <Switcher layer={layer} onChange={setLayer} layers={LAYERS} />
+      <Switcher layer={layer} onChange={setLayer} layers={LAYERS} />
       <MapContainer center={[53.4808, -2.2426]} zoom={10} className="map">
         <TileLayer
           key={layer}
           url={tiles.url}
-          attribution={tiles.attribution} maxZoom={tiles.maxZoom||19}
+          attribution={tiles.attribution}
+          maxZoom={tiles.maxZoom || 19}
         />
+
         {all.map((leg, i) => (
           <Polyline
             key={`bg-${leg.from}-${leg.to}-${i}`}
@@ -81,39 +81,40 @@ export default function MapView({trains,  selectedUid, onSelect, pinnedJourneys}
         <ZoomToTrain train={selectedTrain} />
 
         {journey && journey.legs.map((leg, i) => {
-  let lineColor = '#8a8a90'
-  let lineDash = '6 8'
-  let lineOpacity = 0.5
-  
-  if (leg.passed) {
-    lineColor = '#4caf7d'
-    lineDash = null
-    lineOpacity = 0.85
-  }
-  
-  return (
-    <Polyline
-      key={leg.from + '-' + leg.to + '-' + i}
-      positions={leg.coordinates}
-      pathOptions={{
-        color: lineColor,
-        weight: 4,
-        opacity: lineOpacity,
-        dashArray: lineDash,
-      }}
-    />
-  )
-})}
+          let lineColor = '#8a8a90'
+          let lineDash = '6 8'
+          let lineOpacity = 0.5
+
+          if (leg.passed) {
+            lineColor = '#4caf7d'
+            lineDash = null
+            lineOpacity = 0.85
+          }
+
+          return (
+            <Polyline
+              key={leg.from + '-' + leg.to + '-' + i}
+              positions={leg.coordinates}
+              pathOptions={{
+                color: lineColor,
+                weight: 4,
+                opacity: lineOpacity,
+                dashArray: lineDash,
+              }}
+            />
+          )
+        })}
+
         {pinnedJourneys && Object.keys(pinnedJourneys).map(uid => {
-  const journey = pinnedJourneys[uid]
-  return journey.legs.map((leg, i) => (
-    <Polyline
-      key={'pin-' + uid + '-' + i}
-      positions={leg.coordinates}
-      pathOptions={{ color: '#e0a030', weight: 3, opacity: 0.5 }}
-    />
-  ))
-})}
+          const journey = pinnedJourneys[uid]
+          return journey.legs.map((leg, i) => (
+            <Polyline
+              key={'pin-' + uid + '-' + i}
+              positions={leg.coordinates}
+              pathOptions={{ color: '#e0a030', weight: 3, opacity: 0.5 }}
+            />
+          ))
+        })}
 
         {journey && journey.stops.map(stop => {
           const latlon = getStopPosition(journey, stop.crs)
@@ -133,56 +134,54 @@ export default function MapView({trains,  selectedUid, onSelect, pinnedJourneys}
               <Popup>
                 <strong>{stop.name}</strong><br />
                 {stop.isCancelled && 'Not calling here'}
-{!stop.isCancelled && stop.passed && `Departed ${fmt(stop.actualDep || stop.actualArr)}`}
-{!stop.isCancelled && !stop.passed && `Due ${fmt(stop.schedArr || stop.schedDep)}`}
+                {!stop.isCancelled && stop.passed && `Departed ${fmt(stop.actualDep || stop.actualArr)}`}
+                {!stop.isCancelled && !stop.passed && `Due ${fmt(stop.schedArr || stop.schedDep)}`}
               </Popup>
             </CircleMarker>
           )
         })}
 
         {trains.map(train => {
-  const isSelected = train.uid === selectedUid
-  let markerColor = '#9a9aa0'
-  let markerRadius = 5
-  
-  if (isSelected) {
-    markerColor = '#4da3ff'
-    markerRadius = 9
-  }
-  
-  return (
-    <CircleMarker
-      key={train.uid}
-      center={[train.lat, train.lon]}
-      radius={markerRadius}
-      eventHandlers={{
-        click: function() {
-          onSelect(train.uid)
-        }
-      }}
-      pathOptions={{
-        color: markerColor,
-        fillColor: markerColor,
-        fillOpacity: isSelected ? 1 : 0.7,
-        weight: isSelected ? 3 : 1,
-      }}
-    >
-      <Popup>
-        <strong>{train.headcode || train.uid}</strong>
-        {train.isEstimate && ' est'}
-        <br />
-        {train.operator}
-        <br />
-        between {train.legFrom} and {train.legTo}
-      </Popup>
-    </CircleMarker>
-  )
-})}
-         
-      
+          const isSelected = train.uid === selectedUid
+          let markerColor = '#9a9aa0'
+          let markerRadius = 5
+
+          if (isSelected) {
+            markerColor = '#4da3ff'
+            markerRadius = 9
+          }
+
+          return (
+            <CircleMarker
+              key={train.uid}
+              center={[train.lat, train.lon]}
+              radius={markerRadius}
+              eventHandlers={{
+                click: function () {
+                  onSelect(train.uid)
+                }
+              }}
+              pathOptions={{
+                color: markerColor,
+                fillColor: markerColor,
+                fillOpacity: isSelected ? 1 : 0.7,
+                weight: isSelected ? 3 : 1,
+              }}
+            >
+              <Popup>
+                <strong>{train.headcode || train.uid}</strong>
+                {train.isEstimate && ' est'}
+                <br />
+                {train.operator}
+                <br />
+                between {train.legFrom} and {train.legTo}
+              </Popup>
+            </CircleMarker>
+          )
+        })}
       </MapContainer>
-     <TrainInfo train={selectedTrain} journey={journey} loading={loading} onClose={() => onSelect(null)} />
-        <Legend />
+      <TrainInfo train={selectedTrain} journey={journey} loading={loading} onClose={() => onSelect(null)} />
+      <Legend />
     </div>
-    )
+  )
 }

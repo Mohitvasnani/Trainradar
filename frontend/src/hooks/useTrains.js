@@ -17,31 +17,24 @@ export function useTrains(intervalMs = 60000) {
         setError(null)
         
 
-        if (result.stale === true) {
+        if (result.stale    === true) {
           setStale(true)
-        } else {
-          setStale(false)
-        }
+        } else{
+          setStale(false)}
       } catch (err) {
         setError(err.message)
-      }
-    }
-
-    
+      }}    
     getTrains()
     
     
-    const intervalId = setInterval(getTrains, intervalMs)
+    const intervalId =setInterval(
+      getTrains, intervalMs)
     
     
     return function cleanup() {
       clearInterval(intervalId)
-    }
-  }, [intervalMs])
+    }}, [intervalMs])
 
   return {
     trains, updatedAt, 
-    error, stale
-   }
-
-}
+    error, stale}}

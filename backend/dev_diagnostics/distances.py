@@ -2,32 +2,22 @@ from geopy.distance import geodesic
 
 
 def track_length_km(track):
-    """
-    Real-world length of a track (LineString in lon/lat) in kilometres.
-    Walks the line's points and sums the geodesic distance between each pair.
-    """
     total = 0.0
-    coords = list(track.coords)   # list of (lon, lat) points
+    coords = list(track.coords)
 
     for i in range(len(coords) - 1):
         lon1, lat1 = coords[i]
         lon2, lat2 = coords[i + 1]
-        # geodesic wants (lat, lon) — note the flip
         total += geodesic((lat1, lon1), (lat2, lon2)).km
 
     return total
 
 
 def straight_line_km(coord_a, coord_b):
-    """Straight-line (as-the-crow-flies) distance between two (lat, lon) points, in km."""
     return geodesic(coord_a, coord_b).km
 
 
 def plausibility_ratio(track, coord_a, coord_b):
-    """
-    How much longer is the routed track than the straight line?
-    A ratio near 1 means direct. A big ratio means a suspicious detour.
-    """
     routed = track_length_km(track)
     straight = straight_line_km(coord_a, coord_b)
     if straight == 0:
@@ -43,14 +33,13 @@ if __name__ == "__main__":
     G = load_rail_graph()
     coords = load_station_coords()
 
-    # Test a few legs: a normal one, and the suspicious Bredbury -> Brinnington one
     test_legs = [
-        ("MAN", "SPT"),   # Manchester Piccadilly -> Stockport (should be sensible)
-        ("BDY", "BNT"),   # Bredbury -> Brinnington (suspected detour)
+        ("MAN", "SPT"),
+        ("BDY", "BNT"),
     ]
 
     for crs_a, crs_b in test_legs:
-        track = route_leg(G, coords, crs_a, crs_b)
+        track, _, _ = route_leg(G, coords, crs_a, crs_b)
         if track is None:
             print(f"{crs_a} -> {crs_b}: could not route")
             continue

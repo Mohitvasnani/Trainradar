@@ -19,7 +19,7 @@ export default function TrainInfo({ train, journey, loading, onClose }) {
   let statusClass
   
   if (late == null) {
-    statusText = 'No live report'
+    statusText = 'on time'
     statusClass = 'muted'
   } else if (late > 0) {
     statusText = late + ' min late'
