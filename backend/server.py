@@ -15,7 +15,8 @@ sys.path.insert(0, str(APP_directory))
 from flask import Flask
 from flask_cors import CORS
 from api.routes import bp
-
+from services import cache
+cache.load_route_cache()
 app = Flask(__name__)
 CORS(app)
 app.register_blueprint(bp)

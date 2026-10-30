@@ -3,6 +3,9 @@
 from datetime import datetime, date
 from flask import Blueprint, jsonify
 from services import state, auth, cache, estimation
+from zoneinfo import ZoneInfo
+
+UK = ZoneInfo("Europe/London")
 
 bp = Blueprint( "api",   __name__)
 
@@ -37,7 +40,7 @@ def departures(crs):
 @bp.get("/api/trains")
 def train_area():
     token =auth.get_token()
-
+    now = datetime.now(UK).replace(tzinfo=None)
 
     today =  date.today().isoformat()
     now= datetime.now()
@@ -133,3 +136,7 @@ def all_legs():
         res.append({"from": key [ 0 ],  "to": key[ 1],
             "coordinates": [[round(y, 6), round(x, 6)] for x, y in track.coords]})
     return jsonify({"legs": res})
+@bp.get("/api/save-routes")
+def save_routes():
+    count = cache.save_route_cache()
+    return jsonify({"saved": count})
