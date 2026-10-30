@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { API_BASE } from '../api/base'
 
 export function useJourney(train) {
   const [journey, setJourney] = useState(null)
@@ -28,8 +29,8 @@ export function useJourney(train) {
     
     setLoading(true)
 
-    
-    const url = 'http://127.0.0.1:5000/api/journey/' + uid + '/' + runDate
+
+       const url = API_BASE + '/api/journey/' + uid + '/' + runDate
 
     
     fetch(url)

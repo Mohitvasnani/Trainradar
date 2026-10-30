@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { fetchTrains } from '../api/trains'
-
+import { API_BASE } from '../api/base'
 export function useTrains(intervalMs = 60000) {
   const [trains, setTrains] = useState([])
   const [updatedAt, setUpdatedAt] = useState(null)

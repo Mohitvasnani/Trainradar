@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-
+import { API_BASE } from '../api/base'
 export function useLeg(train) {
   const [coords, setCoords] = useState(null)
 
@@ -19,7 +19,7 @@ export function useLeg(train) {
 
     let isCancelled = false
 
-    const url = 'http://127.0.0.1:5000/api/leg/' + fromStation + '/' + toStation
+       const url = API_BASE + '/api/leg/' + fromStation + '/' + toStation
 
     fetch(url)
       .then(function (response) {

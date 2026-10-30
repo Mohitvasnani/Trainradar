@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { API_BASE } from '../api/base'
 
 const MAX_PINNED = 2
 
@@ -56,7 +57,7 @@ export function usePin(trains, intervalMs = 60000) {
 
         try {
           const response = await fetch(
-            'http://127.0.0.1:5000/api/journey/' + uid + '/' + train.runDate
+                        API_BASE + '/api/journey/' + uid + '/' + train.runDate
           )
 
           if (!response.ok) {
