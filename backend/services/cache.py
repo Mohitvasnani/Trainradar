@@ -1,9 +1,8 @@
 import time
 
 import rtt_client
-from app.route_leg import route_leg
 
-from services.state import G, coords
+from services.state import coords, get_graph
 import json
 import os
 from shapely.geometry import LineString
@@ -49,12 +48,18 @@ _route_cache = {}
 
 
 def get_route(crs_a, crs_b):
-    
     key = (crs_a, crs_b)
-    if key not in _route_cache:
-        track, snap_a, snap_b = route_leg(G, coords, crs_a, crs_b)
-        _route_cache[key] = track
-    return _route_cache[key]
+    if key in _route_cache:
+        return _route_cache[key]
+
+    G = get_graph()
+    if G is None:
+        return None
+
+    from app.route_leg import route_leg
+    track, snap_a, snap_b = route_leg(G, coords, crs_a, crs_b)
+    _route_cache[key] = track
+    return track
 
 
 def route_cache_size():

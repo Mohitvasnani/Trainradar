@@ -17,7 +17,7 @@ def home():    return "TrainRadar API is running"
 @bp.get("/api/status")
 def status():  return jsonify({
         "status": "k",
-        "graphNodes":len(state.G.nodes),
+                "graphLoaded": state.graph_loaded(),
         "routesCached":cache.route_cache_size(),
         "coverage": state.CORRIDOR_STATIONS})
 
@@ -67,7 +67,9 @@ def train_area():
             train = estimation.estimate_trainPosition(ser, token, today, now)
             if train:
                 results.append(train)
-        except Exception: continue
+        except Exception as e: 
+            print(f"estimate failed for {uid}: {e!r}")
+            continue
 
     
     if results:
