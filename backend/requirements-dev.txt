@@ -1,0 +1,11 @@
+-r requirements.txt
+
+osmnx
+networkx
+geopy
+pandas
+numpy
+scipy
+matplotlib
+folium
+pytest
