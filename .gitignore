@@ -8,3 +8,14 @@ frontend/dist/
 backend/cache/
 backend/practice/
 backend/evaluation/results
+# scratch and session output
+Claude outputs/
+cache/
+*.tmp
+
+# dissertation paperwork lives in trainradar-dissertation
+submission/
+
+# generated figures and results
+backend/dev_diagnostics/*.png
+backend/evaluation/*.csv
