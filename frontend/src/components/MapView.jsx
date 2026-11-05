@@ -9,7 +9,7 @@ import { allLegs } from '../hooks/allLegs'
 import Legend from "./Legend";
 import TrainInfo from "./TrainInfo";
 
-const CARTO_API_KEY = 'cb1_33gh_1_ef35ef8db96579e92177048b'
+const CARTO_API_KEY = import.meta.env.VITE_CARTO_API_KEY || ''
 
 const LAYERS = {
   standard: {

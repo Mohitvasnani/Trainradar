@@ -21,3 +21,8 @@ submission/
 backend/dev_diagnostics/*.png
 backend/evaluation/*.csv
 backend/evaluation/results
+corpus.gz
+corpus.json
+tps.tar.bz2
+tps/
+networkrail-data/

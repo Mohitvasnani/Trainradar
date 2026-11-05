@@ -87,8 +87,8 @@ def estimate_trainPosition(svc, token, run_date,now):
         "legFrom": a["name"], "legTo": b["name"],
         "legFromCrs": a["crs"],
         "legToCrs": b["crs"],
-        "lat":round(pos.y, 6),
-        "lon":round(pos.x, 6),
+        "lat":round(pos.y, 5),
+        "lon":round(pos.x, 5),
         "latenessMinutes":get_lateness(temporal),
         "status": temporal.get("status"),
         "estimatedAt": now.isoformat(timespec="seconds"),
@@ -136,16 +136,47 @@ def format_stop(point):
         "schedDep": dep.get("scheduleAdvertised") or dep.get("scheduleInternal"),
         "actualArr": real_arr,
         "actualDep": real_dep,
-        "passed": bool(real_arr or real_dep),
+        "passed": False,
         "isCancelled": arr.get("isCancelled", False) or dep.get("isCancelled", False),
         "platform": platform}
 
 
-def journey_building(token,identity,run_date):
+def _last_passed_index(ser, now, stops):
+    # Works out how far through the journey "now" is, by crs index rather
+    # than by whether RTT has happened to fill in realtimeActual yet.
+    leg = find_live_leg(ser, now)
+    if leg is not None:
+        from_crs = leg[0]["crs"]
+        for i, s in enumerate(stops):
+            if s["crs"] == from_crs:
+                return i
+        return -1
+
+    if not stops:
+        return -1
+
+    first_dep = stops[0].get("schedDep") or stops[0].get("schedArr")
+    last_arr = stops[-1].get("schedArr") or stops[-1].get("schedDep")
+    try:
+        if last_arr and now > datetime.fromisoformat(last_arr):
+            return len(stops) - 1
+        if first_dep and now < datetime.fromisoformat(first_dep):
+            return -1
+    except ValueError:
+        pass
+
+    return -1
+
+
+def journey_building(token,identity,run_date,now):
     ser = get_service_cached(token, identity,run_date)
     locations =ser.get("service", {}).get("locations", [])
     stops=[format_stop(loc) for loc in locations]
     stops =[s for s in stops if s]
+
+    passed_upto = _last_passed_index(ser, now, stops)
+    for i, s in enumerate(stops):
+        s["passed"] = i <= passed_upto
 
     legs=[]
     for a, b in zip(stops, stops[1:]):
@@ -160,6 +191,6 @@ def journey_building(token,identity,run_date):
 
             "passed": b["passed"],
             "ratio": round(ratio, 2) if ratio is not None else None,
-            "coordinates": [[round(y, 6), round(x, 6)] for x, y in track.coords]})
+            "coordinates": [[round(y, 5), round(x, 5)] for x, y in track.coords]})
 
     return {"uid": identity, "runDate":run_date, "stops":stops, "legs":legs}

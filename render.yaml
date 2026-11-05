@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: trainradar-backend
+    env: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: waitress-serve --host=0.0.0.0 --port=$PORT server:app
+    envVars:
+      - key: ALLOWED_ORIGINS
+        sync: false
+      - key: RTT_REFRESH_TOKEN
+        sync: false
+      - key: RTT_BASE_URL
+        sync: false
+      - key: FLASK_DEBUG
+        value: "false"

@@ -16,7 +16,7 @@ def home():    return "TrainRadar API is running"
 
 @bp.get("/api/status")
 def status():  return jsonify({
-        "status": "k",
+        "status": "ok",
                 "graphLoaded": state.graph_loaded(),
         "routesCached":cache.route_cache_size(),
         "coverage": state.CORRIDOR_STATIONS})
@@ -43,7 +43,6 @@ def train_area():
     now = datetime.now(UK).replace(tzinfo=None)
 
     today =  date.today().isoformat()
-    now= datetime.now()
 
     candidates = {}
     for crs in state.CORRIDOR_STATIONS:
@@ -101,15 +100,16 @@ def leg(crs_a, crs_b):
 
     return jsonify({
         "from": crs_a, "to": crs_b,
-        "coordinates": [[round(y, 6), round(x, 6)] for x, y in track.coords] })
+        "coordinates": [[round(y, 5), round(x, 5)] for x, y in track.coords] })
 
 
 @bp.get("/api/journey/<uid>/<run_date>")
 def journey(uid,   run_date):
     token = auth.get_token()
+    now = datetime.now(UK).replace(tzinfo=None)
 
     try:
-        data=   estimation.journey_building(token,  uid,run_date)
+        data=   estimation.journey_building(token,  uid,run_date, now)
     except Exception:
         return jsonify({"Error": f"unable to build {uid}"}), 502
 
@@ -136,9 +136,5 @@ def all_legs():
             continue
 
         res.append({"from": key [ 0 ],  "to": key[ 1],
-            "coordinates": [[round(y, 6), round(x, 6)] for x, y in track.coords]})
+            "coordinates": [[round(y, 5), round(x, 5)] for x, y in track.coords]})
     return jsonify({"legs": res})
-@bp.get("/api/save-routes")
-def save_routes():
-    count = cache.save_route_cache()
-    return jsonify({"saved": count})

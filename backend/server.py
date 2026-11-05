@@ -35,4 +35,5 @@ print(f"boot took {time.time() - _start:.2f}s")
 
 if __name__ == "__main__":
     print(app.url_map)
-    app.run(debug=True, use_reloader=False)
+    debug = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
+    app.run(debug=debug, use_reloader=False)

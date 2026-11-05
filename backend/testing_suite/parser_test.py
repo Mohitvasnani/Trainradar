@@ -25,16 +25,15 @@ def test_format_stop_basic():
             }
         }
     }
-    
+
     result = format_stop(point)
-    
+
     assert result["crs"] == "LIV"
     assert result["name"] == "Liverpool Lime Street"
     assert result["schedArr"] == "2026-08-24T10:00:00"
     assert result["actualArr"] == "2026-08-24T10:02:00"
-    assert result["passed"] is True
+    assert result["passed"] is False  # set later by journey_building, not here
     assert result["platform"] == "7"
-
 
 def test_format_stop_not_passed_yet():
     # Station train hasn't reached yet
