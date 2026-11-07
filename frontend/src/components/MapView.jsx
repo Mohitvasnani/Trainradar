@@ -5,7 +5,7 @@ import ZoomToTrain from './ZoomToTrain'
 import { useJourney } from '../hooks/useJourney'
 import { useState } from 'react'
 import Switcher from './Switcher'
-import { allLegs } from '../hooks/allLegs'
+import { useAllLegs } from '../hooks/allLegs'
 import Legend from "./Legend";
 import TrainInfo from "./TrainInfo";
 
@@ -57,7 +57,7 @@ export default function MapView({ trains, selectedUid, onSelect, pinnedJourneys 
   const [layer, setLayer] = useState('standard')
   const tiles = LAYERS[layer]
 
-  const all = allLegs()
+  const all = useAllLegs()
 
   return (
     <div className="map-wrap">
