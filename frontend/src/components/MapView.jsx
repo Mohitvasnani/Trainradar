@@ -84,11 +84,19 @@ export default function MapView({ trains, selectedUid, onSelect, pinnedJourneys 
           let lineColor = '#8a8a90'
           let lineDash = '6 8'
           let lineOpacity = 0.5
+          let lineWeight = 4
 
           if (leg.passed) {
             lineColor = '#4caf7d'
             lineDash = null
             lineOpacity = 0.85
+            lineWeight = 4
+          }
+
+          if (leg.approximate) {
+            lineWeight = 2
+            lineDash = '2 6'
+            lineOpacity = 0.35
           }
 
           return (
@@ -97,7 +105,7 @@ export default function MapView({ trains, selectedUid, onSelect, pinnedJourneys 
               positions={leg.coordinates}
               pathOptions={{
                 color: lineColor,
-                weight: 4,
+                weight: lineWeight,
                 opacity: lineOpacity,
                 dashArray: lineDash,
               }}
@@ -164,7 +172,8 @@ export default function MapView({ trains, selectedUid, onSelect, pinnedJourneys 
               pathOptions={{
                 color: markerColor,
                 fillColor: markerColor,
-                fillOpacity: isSelected ? 1 : 0.7,
+                fillOpacity: train.isApproximate ? 0 : (isSelected ? 1 : 0.25),
+                dashArray: train.isApproximate ? '3 3' : null,
                 weight: isSelected ? 3 : 1,
               }}
             >

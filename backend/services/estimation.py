@@ -4,12 +4,11 @@ Position estimation and selecting response format
 
 from datetime import datetime, timedelta
 
-  
 
 from app.estimate import estimate_position
 from app.find_current_leg import find_live_leg
 from services.cache import get_service_cached, get_route
-from services.geometry import route_plausibility, is_implausible
+from services.geometry import route_plausibility, is_implausible, straight_line_track
 
 
 
@@ -68,10 +67,14 @@ def estimate_trainPosition(svc, token, run_date,now):
     leg = find_live_leg(service, now)
     if leg is None: return None
     a,b = leg
+
     track = get_route(a["crs"], b["crs"])
+    approximate = False
+    if track is None:
+        track = straight_line_track(a["crs"], b["crs"])
+        approximate = True
     if track is None:
         return None
-
 
     pos = estimate_position(track, a["departure"], b["arrival"], now)
     temporal = svc.get("temporalData", {})
@@ -92,7 +95,8 @@ def estimate_trainPosition(svc, token, run_date,now):
         "latenessMinutes":get_lateness(temporal),
         "status": temporal.get("status"),
         "estimatedAt": now.isoformat(timespec="seconds"),
-        "isEstimate": True}
+        "isEstimate": True,
+        "isApproximate": approximate}
 
 
 def full_depboard(svc):
@@ -181,15 +185,27 @@ def journey_building(token,identity,run_date,now):
     legs=[]
     for a, b in zip(stops, stops[1:]):
         track = get_route(a["crs"], b["crs"])
-        if track is None: continue
+        ratio = None
+        approximate = False
 
-        ratio = route_plausibility(track, a["crs"], b["crs"])
-        if is_implausible(ratio): continue
+        if track is not None:
+            ratio = route_plausibility(track, a["crs"], b["crs"])
+            if is_implausible(ratio):
+                track = None
+                ratio = None
+
+        if track is None:
+            track = straight_line_track(a["crs"], b["crs"])
+            approximate = True
+
+        if track is None:
+            continue
 
         legs.append({"from": a["crs"],
             "to": b["crs"],
 
             "passed": b["passed"],
+            "approximate": approximate,
             "ratio": round(ratio, 2) if ratio is not None else None,
             "coordinates": [[round(y, 5), round(x, 5)] for x, y in track.coords]})
 

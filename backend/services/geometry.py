@@ -1,7 +1,7 @@
 import math
 
 from services.state import coords
-
+from shapely.geometry import LineString
 
 EARTH_RADIUS_M = 6371000
 MAX_ROUTE_RATIO = 1.5
@@ -42,3 +42,14 @@ def route_plausibility(track, crs_a, crs_b):
 def is_implausible(ratio):
     # Check if ratio is too high
     return ratio is not None and ratio > MAX_ROUTE_RATIO
+
+def straight_line_track(crs_a, crs_b):
+    # Two-point fallback for legs with no routable track geometry.
+    # Deliberately separate from get_route so straight lines never enter
+    # the route cache and get persisted as if they were real track.
+    if crs_a not in coords or crs_b not in coords:
+        return None
+
+    lat_a, lon_a = coords[crs_a]
+    lat_b, lon_b = coords[crs_b]
+    return LineString([(lon_a, lat_a), (lon_b, lat_b)])
