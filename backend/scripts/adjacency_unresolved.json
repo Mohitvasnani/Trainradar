@@ -1,0 +1,532 @@
+[
+  {
+    "crs_a": "SPL",
+    "crs_b": "ZFD",
+    "count": 11703
+  },
+  {
+    "crs_a": "LSX",
+    "crs_b": "WHX",
+    "count": 11192
+  },
+  {
+    "crs_a": "BDS",
+    "crs_b": "PDX",
+    "count": 11183
+  },
+  {
+    "crs_a": "FDX",
+    "crs_b": "TCR",
+    "count": 11183
+  },
+  {
+    "crs_a": "FDX",
+    "crs_b": "LSX",
+    "count": 11183
+  },
+  {
+    "crs_a": "MCV",
+    "crs_b": "MLP",
+    "count": 7705
+  },
+  {
+    "crs_a": "CBG",
+    "crs_b": "CMS",
+    "count": 6344
+  },
+  {
+    "crs_a": "KNL",
+    "crs_b": "WJL",
+    "count": 5875
+  },
+  {
+    "crs_a": "HDN",
+    "crs_b": "WJL",
+    "count": 5344
+  },
+  {
+    "crs_a": "FLT",
+    "crs_b": "WIX",
+    "count": 4992
+  },
+  {
+    "crs_a": "GUN",
+    "crs_b": "ZTU",
+    "count": 4005
+  },
+  {
+    "crs_a": "QPW",
+    "crs_b": "ZEL",
+    "count": 3290
+  },
+  {
+    "crs_a": "ZTU",
+    "crs_b": "ZUM",
+    "count": 2347
+  },
+  {
+    "crs_a": "AND",
+    "crs_b": "GCL",
+    "count": 2187
+  },
+  {
+    "crs_a": "AGS",
+    "crs_b": "GCL",
+    "count": 2180
+  },
+  {
+    "crs_a": "GQL",
+    "crs_b": "HST",
+    "count": 1851
+  },
+  {
+    "crs_a": "CHC",
+    "crs_b": "GQL",
+    "count": 1851
+  },
+  {
+    "crs_a": "LVL",
+    "crs_b": "MRF",
+    "count": 1717
+  },
+  {
+    "crs_a": "DVP",
+    "crs_b": "FKE",
+    "count": 1703
+  },
+  {
+    "crs_a": "FKC",
+    "crs_b": "FKE",
+    "count": 1703
+  },
+  {
+    "crs_a": "SGB",
+    "crs_b": "SMW",
+    "count": 1179
+  },
+  {
+    "crs_a": "HEZ",
+    "crs_b": "PAW",
+    "count": 1120
+  },
+  {
+    "crs_a": "STI",
+    "crs_b": "STZ",
+    "count": 1092
+  },
+  {
+    "crs_a": "SEB",
+    "crs_b": "STI",
+    "count": 1092
+  },
+  {
+    "crs_a": "BNR",
+    "crs_b": "FEG",
+    "count": 1092
+  },
+  {
+    "crs_a": "REG",
+    "crs_b": "SGH",
+    "count": 1082
+  },
+  {
+    "crs_a": "CIC",
+    "crs_b": "SUN",
+    "count": 1080
+  },
+  {
+    "crs_a": "PAI",
+    "crs_b": "SHZ",
+    "count": 1060
+  },
+  {
+    "crs_a": "MIF",
+    "crs_b": "PAI",
+    "count": 1060
+  },
+  {
+    "crs_a": "MIF",
+    "crs_b": "UNV",
+    "count": 1060
+  },
+  {
+    "crs_a": "CIC",
+    "crs_b": "UNV",
+    "count": 1060
+  },
+  {
+    "crs_a": "PSH",
+    "crs_b": "WPH",
+    "count": 1055
+  },
+  {
+    "crs_a": "AYW",
+    "crs_b": "LLB",
+    "count": 911
+  },
+  {
+    "crs_a": "BOW",
+    "crs_b": "LLB",
+    "count": 911
+  },
+  {
+    "crs_a": "ZEH",
+    "crs_b": "ZTU",
+    "count": 792
+  },
+  {
+    "crs_a": "ROW",
+    "crs_b": "SMW",
+    "count": 790
+  },
+  {
+    "crs_a": "HEZ",
+    "crs_b": "NCZ",
+    "count": 602
+  },
+  {
+    "crs_a": "NCZ",
+    "crs_b": "SGH",
+    "count": 602
+  },
+  {
+    "crs_a": "LIC",
+    "crs_b": "LIF",
+    "count": 594
+  },
+  {
+    "crs_a": "BGY",
+    "crs_b": "NEI",
+    "count": 582
+  },
+  {
+    "crs_a": "BGY",
+    "crs_b": "PTT",
+    "count": 582
+  },
+  {
+    "crs_a": "APN",
+    "crs_b": "REG",
+    "count": 562
+  },
+  {
+    "crs_a": "IFR",
+    "crs_b": "SGH",
+    "count": 518
+  },
+  {
+    "crs_a": "IFR",
+    "crs_b": "WEJ",
+    "count": 518
+  },
+  {
+    "crs_a": "JES",
+    "crs_b": "WEJ",
+    "count": 518
+  },
+  {
+    "crs_a": "HMA",
+    "crs_b": "JES",
+    "count": 518
+  },
+  {
+    "crs_a": "GAT",
+    "crs_b": "NCZ",
+    "count": 518
+  },
+  {
+    "crs_a": "GAS",
+    "crs_b": "GAT",
+    "count": 518
+  },
+  {
+    "crs_a": "FLG",
+    "crs_b": "GAS",
+    "count": 518
+  },
+  {
+    "crs_a": "FLG",
+    "crs_b": "HEZ",
+    "count": 518
+  },
+  {
+    "crs_a": "ZHS",
+    "crs_b": "ZTU",
+    "count": 505
+  },
+  {
+    "crs_a": "FAW",
+    "crs_b": "KIP",
+    "count": 489
+  },
+  {
+    "crs_a": "FAW",
+    "crs_b": "WRD",
+    "count": 489
+  },
+  {
+    "crs_a": "REG",
+    "crs_b": "WRD",
+    "count": 489
+  },
+  {
+    "crs_a": "APN",
+    "crs_b": "CEP",
+    "count": 487
+  },
+  {
+    "crs_a": "BAF",
+    "crs_b": "CEP",
+    "count": 487
+  },
+  {
+    "crs_a": "BAF",
+    "crs_b": "KIP",
+    "count": 487
+  },
+  {
+    "crs_a": "LGG",
+    "crs_b": "SMW",
+    "count": 414
+  },
+  {
+    "crs_a": "BLU",
+    "crs_b": "WNO",
+    "count": 385
+  },
+  {
+    "crs_a": "CAX",
+    "crs_b": "SHQ",
+    "count": 302
+  },
+  {
+    "crs_a": "CAX",
+    "crs_b": "FIZ",
+    "count": 302
+  },
+  {
+    "crs_a": "FIZ",
+    "crs_b": "HYP",
+    "count": 302
+  },
+  {
+    "crs_a": "CIN",
+    "crs_b": "HYP",
+    "count": 302
+  },
+  {
+    "crs_a": "CIN",
+    "crs_b": "NUR",
+    "count": 300
+  },
+  {
+    "crs_a": "NUR",
+    "crs_b": "WOD",
+    "count": 300
+  },
+  {
+    "crs_a": "ATE",
+    "crs_b": "WOD",
+    "count": 300
+  },
+  {
+    "crs_a": "ATE",
+    "crs_b": "SAI",
+    "count": 300
+  },
+  {
+    "crs_a": "SAI",
+    "crs_b": "VAE",
+    "count": 300
+  },
+  {
+    "crs_a": "CAE",
+    "crs_b": "VAE",
+    "count": 300
+  },
+  {
+    "crs_a": "CAE",
+    "crs_b": "TIN",
+    "count": 300
+  },
+  {
+    "crs_a": "MAB",
+    "crs_b": "RMC",
+    "count": 300
+  },
+  {
+    "crs_a": "PAQ",
+    "crs_b": "RMC",
+    "count": 300
+  },
+  {
+    "crs_a": "HMA",
+    "crs_b": "MMS",
+    "count": 263
+  },
+  {
+    "crs_a": "MMS",
+    "crs_b": "NCZ",
+    "count": 263
+  },
+  {
+    "crs_a": "TAH",
+    "crs_b": "WNE",
+    "count": 257
+  },
+  {
+    "crs_a": "MNH",
+    "crs_b": "NCZ",
+    "count": 255
+  },
+  {
+    "crs_a": "HMA",
+    "crs_b": "MNH",
+    "count": 255
+  },
+  {
+    "crs_a": "BEJ",
+    "crs_b": "BLI",
+    "count": 237
+  },
+  {
+    "crs_a": "BLI",
+    "crs_b": "NWH",
+    "count": 237
+  },
+  {
+    "crs_a": "ALE",
+    "crs_b": "WSA",
+    "count": 233
+  },
+  {
+    "crs_a": "OKE",
+    "crs_b": "OKI",
+    "count": 233
+  },
+  {
+    "crs_a": "CDI",
+    "crs_b": "OKI",
+    "count": 233
+  },
+  {
+    "crs_a": "BDG",
+    "crs_b": "GCL",
+    "count": 231
+  },
+  {
+    "crs_a": "ZTH",
+    "crs_b": "ZTU",
+    "count": 226
+  },
+  {
+    "crs_a": "AMS",
+    "crs_b": "ROT",
+    "count": 221
+  },
+  {
+    "crs_a": "BXS",
+    "crs_b": "ROT",
+    "count": 221
+  },
+  {
+    "crs_a": "EDS",
+    "crs_b": "TRR",
+    "count": 209
+  },
+  {
+    "crs_a": "ALE",
+    "crs_b": "MSH",
+    "count": 205
+  },
+  {
+    "crs_a": "EXG",
+    "crs_b": "GCL",
+    "count": 176
+  },
+  {
+    "crs_a": "WPK",
+    "crs_b": "ZPU",
+    "count": 47
+  },
+  {
+    "crs_a": "ZHA",
+    "crs_b": "ZTU",
+    "count": 41
+  },
+  {
+    "crs_a": "BLG",
+    "crs_b": "GQL",
+    "count": 41
+  },
+  {
+    "crs_a": "ZET",
+    "crs_b": "ZTU",
+    "count": 39
+  },
+  {
+    "crs_a": "CFC",
+    "crs_b": "NOD",
+    "count": 32
+  },
+  {
+    "crs_a": "HEH",
+    "crs_b": "SGE",
+    "count": 28
+  },
+  {
+    "crs_a": "HAR",
+    "crs_b": "HEH",
+    "count": 28
+  },
+  {
+    "crs_a": "CFC",
+    "crs_b": "HAR",
+    "count": 28
+  },
+  {
+    "crs_a": "EDS",
+    "crs_b": "TQY",
+    "count": 26
+  },
+  {
+    "crs_a": "ZKB",
+    "crs_b": "ZTU",
+    "count": 24
+  },
+  {
+    "crs_a": "ZDE",
+    "crs_b": "ZTU",
+    "count": 19
+  },
+  {
+    "crs_a": "EVE",
+    "crs_b": "WPH",
+    "count": 14
+  },
+  {
+    "crs_a": "ZBQ",
+    "crs_b": "ZTU",
+    "count": 11
+  },
+  {
+    "crs_a": "BNO",
+    "crs_b": "SGH",
+    "count": 9
+  },
+  {
+    "crs_a": "KDM",
+    "crs_b": "KID",
+    "count": 2
+  },
+  {
+    "crs_a": "BUN",
+    "crs_b": "CDQ",
+    "count": 1
+  },
+  {
+    "crs_a": "BUN",
+    "crs_b": "CDB",
+    "count": 1
+  }
+]

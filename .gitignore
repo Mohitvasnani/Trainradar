@@ -26,3 +26,6 @@ corpus.json
 tps.tar.bz2
 tps/
 networkrail-data/
+osm-data/
+backend/data/route_cache_*_backup.json
+backend/scripts/diagnostic_results_sample.json

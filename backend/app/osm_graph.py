@@ -1,8 +1,13 @@
 import os
 
-NORTH, SOUTH, EAST, WEST = 55.00, 52.90, -1.90, -3.95
+NORTH, SOUTH, EAST, WEST = 60.90, 49.90, 1.80, -8.20
 
-RAIL_FILTER = '["railway"~"rail"]["railway"!~"tram|light_rail|subway|miniature|monorail|funicular"]'
+RAIL_FILTER = (
+    '["railway"~"rail"]'
+    '["railway"!~"tram|light_rail|subway|miniature|monorail|funicular"]'
+    '["service"!~"yard|siding|spur|crossover"]'
+    '["usage"!~"industrial"]'
+)
 
 CACHE_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "rail_graph.graphml")
 
@@ -26,15 +31,13 @@ def load_rail_graph(allow_download=False):
 
 def _download_graph():
     import osmnx as ox
-    ox.settings.max_query_area_size = 50_000_000_000
 
-    print("downloading rail graph from OSM..")
-    bbox = (WEST, SOUTH, EAST, NORTH)
-    G = ox.graph_from_bbox(
-        bbox,
-        custom_filter=RAIL_FILTER,
-        retain_all=True,
-        simplify=False)
+    XML_PATH = os.path.join(
+        os.path.dirname(__file__), "..", "..", "osm-data", "gb-rail.osm"
+    )
+
+    print("building rail graph from local OSM extract..")
+    G = ox.graph_from_xml(XML_PATH, retain_all=True, simplify=False)
     ox.save_graphml(G, CACHE_PATH)
-    print(f"graph downloaded to {CACHE_PATH}")
+    print(f"graph built to {CACHE_PATH}")
     return G
