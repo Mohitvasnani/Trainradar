@@ -81,22 +81,20 @@ export default function MapView({ trains, selectedUid, onSelect, pinnedJourneys 
         <ZoomToTrain train={selectedTrain} />
 
         {journey && journey.legs.map((leg, i) => {
+          // No geometry means no line. An approximate leg is a straight
+          // segment between two stations, which would cut through buildings
+          // and claim track that isn't there. The train marker still shows,
+          // hollow, so the service stays visible without the map lying.
+          if (leg.approximate) return null
+
           let lineColor = '#8a8a90'
           let lineDash = '6 8'
           let lineOpacity = 0.5
-          let lineWeight = 4
 
           if (leg.passed) {
             lineColor = '#4caf7d'
             lineDash = null
             lineOpacity = 0.85
-            lineWeight = 4
-          }
-
-          if (leg.approximate) {
-            lineWeight = 2
-            lineDash = '2 6'
-            lineOpacity = 0.35
           }
 
           return (
@@ -105,7 +103,7 @@ export default function MapView({ trains, selectedUid, onSelect, pinnedJourneys 
               positions={leg.coordinates}
               pathOptions={{
                 color: lineColor,
-                weight: lineWeight,
+                weight: 4,
                 opacity: lineOpacity,
                 dashArray: lineDash,
               }}
@@ -115,7 +113,7 @@ export default function MapView({ trains, selectedUid, onSelect, pinnedJourneys 
 
         {pinnedJourneys && Object.keys(pinnedJourneys).map(uid => {
           const journey = pinnedJourneys[uid]
-          return journey.legs.map((leg, i) => (
+          return journey.legs.filter(leg => !leg.approximate).map((leg, i) => (
             <Polyline
               key={'pin-' + uid + '-' + i}
               positions={leg.coordinates}

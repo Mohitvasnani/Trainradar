@@ -94,23 +94,35 @@ def main():
             schedules_passenger += 1
 
             locations = segment.get("schedule_location") or []
-            tiplocs = []
-            for loc in locations:
-                t = (loc.get("tiploc_code") or "").strip()
-                if t:
-                    tiplocs.append(t)
 
-            for a, b in zip(tiplocs, tiplocs[1:]):
-                crs_a = tiploc_to_crs.get(a)
-                crs_b = tiploc_to_crs.get(b)
-                if not crs_a:
-                    missing_crs_tiplocs.add(a)
-                if not crs_b:
-                    missing_crs_tiplocs.add(b)
-                if not crs_a or not crs_b or crs_a == crs_b:
+            # Pair consecutive CALLING POINTS, not consecutive schedule
+            # locations. The raw list interleaves junctions and signal boxes,
+            # which have no CRS, and pairing across them dropped every leg
+            # touching a major station: big termini are approached through
+            # junctions, so MAN appeared in 1 pair and EUS/LIV/LDS/PRE in none.
+            #
+            # A location with a "pass" time is run through, not called at, so
+            # it is excluded: a fast service needs the A-B pair that skips it,
+            # which is what RTT will ask for. A call whose TIPLOC has no CRS
+            # (platform-specific variants like WMBYDC) is skipped rather than
+            # allowed to break the chain, which bridges over that station.
+            calls = []
+            for loc in locations:
+                if loc.get("pass"):
                     continue
-                pair = tuple(sorted((crs_a, crs_b)))
-                pair_counts[pair] += 1
+                t = (loc.get("tiploc_code") or "").strip()
+                if not t:
+                    continue
+                crs = tiploc_to_crs.get(t)
+                if not crs:
+                    missing_crs_tiplocs.add(t)
+                    continue
+                if calls and calls[-1] == crs:
+                    continue
+                calls.append(crs)
+
+            for crs_a, crs_b in zip(calls, calls[1:]):
+                pair_counts[tuple(sorted((crs_a, crs_b)))] += 1
 
     print()
     print(f"Done. {lines_processed} lines, {schedules_seen} schedules seen, "

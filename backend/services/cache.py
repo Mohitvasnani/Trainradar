@@ -52,6 +52,20 @@ def get_route(crs_a, crs_b):
     if key in _route_cache:
         return _route_cache[key]
 
+    # Cache keys are written alphabetically by the warming job, because the
+    # adjacency list is undirected. Lookups are not: a train running MCV to
+    # MCO would miss a cache holding MCO-MCV, which is about half of all
+    # journeys. Reversing the coordinates matters, since estimate_position
+    # interpolates a fraction from a to b and a backwards track puts the
+    # train at the wrong end of the leg.
+    rev = (crs_b, crs_a)
+    if rev in _route_cache:
+        track = _route_cache[rev]
+        if track is not None:
+            track = LineString(list(track.coords)[::-1])
+        _route_cache[key] = track
+        return track
+
     G = get_graph()
     if G is None:
         return None
