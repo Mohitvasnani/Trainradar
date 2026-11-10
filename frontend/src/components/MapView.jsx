@@ -9,24 +9,22 @@ import { useAllLegs } from '../hooks/allLegs'
 import Legend from "./Legend";
 import TrainInfo from "./TrainInfo";
 
+// CARTO's raster basemaps serve without a key. The variable stays supported
+// in case an account ever requires one, but an empty value must not be sent:
+// "?key=" with nothing after it returns watermarked tiles.
 const CARTO_API_KEY = import.meta.env.VITE_CARTO_API_KEY || ''
+const CARTO_SUFFIX = CARTO_API_KEY ? '?key=' + CARTO_API_KEY : ''
 
 const LAYERS = {
-  standard: {
-    label: 'Standard',
-    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-    attribution: '&copy; OpenStreetMap contributors',
-    maxZoom: 19,
-  },
   light: {
     label: 'Light',
-    url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png?key=' + CARTO_API_KEY,
+    url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png' + CARTO_SUFFIX,
     attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
     maxZoom: 20,
   },
   dark: {
     label: 'Dark',
-    url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png?key=' + CARTO_API_KEY,
+    url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png' + CARTO_SUFFIX,
     attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
     maxZoom: 20,
   },
@@ -54,7 +52,7 @@ export default function MapView({ trains, selectedUid, onSelect, pinnedJourneys 
   const selectedTrain = trains.find(t => t.uid === selectedUid)
   const { journey, loading } = useJourney(selectedTrain)
 
-  const [layer, setLayer] = useState('standard')
+  const [layer, setLayer] = useState('dark')
   const tiles = LAYERS[layer]
 
   const all = useAllLegs()

@@ -77,7 +77,10 @@ From `frontend/`:
 Copy `.env.example` to `.env`:
 
     VITE_API_BASE=http://127.0.0.1:5000
-    VITE_CARTO_API_KEY=your_carto_api_key_here
+
+`VITE_CARTO_API_KEY` is optional. CARTO's raster basemaps serve without a key,
+so leave it unset unless your CARTO account requires one. Do not set it to an
+empty value: a blank `?key=` returns watermarked tiles.
 
     npm run dev
 
@@ -196,8 +199,7 @@ in the dashboard. A `Dockerfile` is included as an alternative. Both install
 `requirements.txt` only, which is why the graph must not be a runtime
 dependency.
 
-Frontend on Vercel with root directory `frontend`. Set `VITE_API_BASE` and
-`VITE_CARTO_API_KEY` before the build runs.
+Frontend on Vercel with root directory `frontend`. Set `VITE_API_BASE` before the build runs.
 
 ## Project layout
 
