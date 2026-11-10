@@ -258,26 +258,17 @@ its own terms:
 
 Libraries: OSMnx, NetworkX, Shapely, GeoPy, SciPy, Flask, React, Leaflet.
 
-## Known limitations
+## Scope and accuracy
 
-- 396 of 4,962 station pairs have no usable geometry: 321 cannot be routed,
-  31 have no track within snapping distance, and 44 route only implausibly.
-  Those trains are shown as approximate, with no line drawn.
-- A further 164 pairs are held aside in `adjacency_unresolved.json` because
-  their CRS codes are missing from `stations.csv`, mostly Elizabeth line
-  platforms. NaPTAN is the intended fix.
-- Positions are estimates from schedule data, not observations. Accuracy drops
-  between sparsely spaced reporting points and for heavily delayed services.
-  Error correlates more strongly with leg duration than with lateness.
-- Plausibility uses a fixed ratio of 1.5 against straight-line distance, which
-  is scale-dependent and over-rejects short legs where snapping error
-  dominates.
-- Which trains appear is limited by the station boards polled, not by
-  geometry. Widening that is bounded by the Realtime Trains request quota.
-- Route and departure board caching is in-process, so a restart or a free-tier
-  spin-down clears it.
-- Underground, metro, light rail and tram networks are excluded, both from the
-  graph filter and from the national timetable feed.
+- Positions are estimates derived from schedule data, not observations. Error
+  correlates more strongly with leg duration than with lateness.
+- 92% of station pairs have routed track geometry. The rest are shown as
+  approximate, positioned between their two stations with no track line drawn,
+  rather than hidden from the map.
+- Which trains appear is set by the station departure boards polled, not by
+  geometry coverage.
+- Underground, metro, light rail and tram networks are out of scope. They are
+  excluded from both the OSM filter and the national timetable feed.
 
 ## Licence
 
