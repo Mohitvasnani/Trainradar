@@ -259,7 +259,7 @@ its own terms:
 Libraries: OSMnx, NetworkX, Shapely, GeoPy, SciPy, Flask, React, Leaflet.
 
 ## Scope and accuracy
-
+- delay in loading services at it is using free tier deployment options
 - Positions are estimates derived from schedule data, not observations. Error
   correlates more strongly with leg duration than with lateness.
 - 92% of station pairs have routed track geometry. The rest are shown as
