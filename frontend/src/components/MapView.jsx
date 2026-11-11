@@ -1,5 +1,7 @@
-import { MapContainer, TileLayer, CircleMarker, Popup, Polyline } from 'react-leaflet'
+import { MapContainer, TileLayer, CircleMarker, Marker, Popup, Polyline } from 'react-leaflet'
+import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import '../css/Terminus.css'
 
 import ZoomToTrain from './ZoomToTrain'
 import { useJourney } from '../hooks/useJourney'
@@ -8,31 +10,23 @@ import Switcher from './Switcher'
 import { useAllLegs } from '../hooks/allLegs'
 import Legend from "./Legend";
 import TrainInfo from "./TrainInfo";
-
-// CARTO's raster basemaps serve without a key. The variable stays supported
-// in case an account ever requires one, but an empty value must not be sent:
-// "?key=" with nothing after it returns watermarked tiles.
-const CARTO_API_KEY = import.meta.env.VITE_CARTO_API_KEY || ''
-const CARTO_SUFFIX = CARTO_API_KEY ? '?key=' + CARTO_API_KEY : ''
-
-const LAYERS = {
-  light: {
-    label: 'Light',
-    url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png' + CARTO_SUFFIX,
-    attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
-    maxZoom: 20,
-  },
-  dark: {
-    label: 'Dark',
-    url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png' + CARTO_SUFFIX,
-    attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
-    maxZoom: 20,
-  },
-}
+import { LAYERS } from '../basemaps'
 
 function fmt(iso) {
   if (!iso) return '—'
   return new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+}
+
+// Origin and destination need a letter inside the marker, which a
+// CircleMarker cannot do, so these two are divIcons instead.
+function terminusIcon(letter, kind) {
+  return L.divIcon({
+    className: 'terminus-marker',
+    html: `<span class="terminus-${kind}">${letter}</span>`,
+    iconSize: [22, 22],
+    iconAnchor: [11, 11],
+    popupAnchor: [0, -11],
+  })
 }
 
 function getStopPosition(journey, crs) {
@@ -66,6 +60,8 @@ export default function MapView({ trains, selectedUid, onSelect, pinnedJourneys 
           url={tiles.url}
           attribution={tiles.attribution}
           maxZoom={tiles.maxZoom || 19}
+          maxNativeZoom={tiles.maxNativeZoom}
+          detectRetina={true}
         />
 
         {all.map((leg, i) => (
@@ -120,12 +116,41 @@ export default function MapView({ trains, selectedUid, onSelect, pinnedJourneys 
           ))
         })}
 
-        {journey && journey.stops.map(stop => {
+        {journey && journey.stops.map((stop, i) => {
           const latlon = getStopPosition(journey, stop.crs)
           if (!latlon) return null
+
+          const isOrigin = i === 0
+          const isDestination = i === journey.stops.length - 1
+          const isTerminus = isOrigin || isDestination
+
+          const popup = (
+            <Popup>
+              <strong>{stop.name}</strong>
+              {isOrigin && ' · origin'}
+              {isDestination && ' · destination'}
+              <br />
+              {stop.isCancelled && 'Not calling here'}
+              {!stop.isCancelled && stop.passed && `Departed ${fmt(stop.actualDep || stop.actualArr)}`}
+              {!stop.isCancelled && !stop.passed && `Due ${fmt(stop.schedArr || stop.schedDep)}`}
+            </Popup>
+          )
+
+          if (isTerminus) {
+            return (
+              <Marker
+                key={stop.crs + '-' + i}
+                position={latlon}
+                icon={terminusIcon(isOrigin ? 'S' : 'D', isOrigin ? 'start' : 'end')}
+              >
+                {popup}
+              </Marker>
+            )
+          }
+
           return (
             <CircleMarker
-              key={stop.crs}
+              key={stop.crs + '-' + i}
               center={latlon}
               radius={4}
               pathOptions={{
@@ -135,12 +160,7 @@ export default function MapView({ trains, selectedUid, onSelect, pinnedJourneys 
                 weight: 2,
               }}
             >
-              <Popup>
-                <strong>{stop.name}</strong><br />
-                {stop.isCancelled && 'Not calling here'}
-                {!stop.isCancelled && stop.passed && `Departed ${fmt(stop.actualDep || stop.actualArr)}`}
-                {!stop.isCancelled && !stop.passed && `Due ${fmt(stop.schedArr || stop.schedDep)}`}
-              </Popup>
+              {popup}
             </CircleMarker>
           )
         })}

@@ -5,7 +5,7 @@ NORTH, SOUTH, EAST, WEST = 60.90, 49.90, 1.80, -8.20
 RAIL_FILTER = (
     '["railway"~"rail"]'
     '["railway"!~"tram|light_rail|subway|miniature|monorail|funicular"]'
-    '["service"!~"yard|siding|spur|crossover"]'
+            '["service"!~"yard|siding|spur"]'
     '["usage"!~"industrial"]'
 )
 

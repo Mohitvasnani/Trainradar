@@ -78,9 +78,7 @@ Copy `.env.example` to `.env`:
 
     VITE_API_BASE=http://127.0.0.1:5000
 
-`VITE_CARTO_API_KEY` is optional. CARTO's raster basemaps serve without a key,
-so leave it unset unless your CARTO account requires one. Do not set it to an
-empty value: a blank `?key=` returns watermarked tiles.
+Basemap tiles are CARTO Positron and Dark Matter, served without a key.
 
     npm run dev
 

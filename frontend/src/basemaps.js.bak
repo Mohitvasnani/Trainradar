@@ -1,0 +1,39 @@
+// Basemap configuration.
+//
+// The map previously used CARTO Positron and Dark Matter raster tiles.
+// CARTO began requiring an API key on those tiles in late 2026: keyless
+// requests still return HTTP 200, but every tile is stamped "API KEY
+// REQUIRED", so the map looks broken while every status check passes.
+//
+// Rather than tie the application to a key that has to be provisioned
+// before the map will render, it now uses Esri's Gray Canvas services,
+// which serve tiles without a key or a signup. They provide a muted
+// light/dark pair, which is what this map needs: the basemap has to stay
+// visually quiet so train markers and route polylines read clearly on
+// top of it.
+//
+// Attribution text is taken from each service's own copyrightText field.
+
+const ESRI_BASE = 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas'
+const ESRI_ATTRIBUTION =
+  'Tiles &copy; Esri, HERE, Garmin, &copy; OpenStreetMap contributors, and the GIS user community'
+
+// Both services are cached to zoom 19 over Great Britain. maxNativeZoom
+// lets Leaflet upscale the final level instead of rendering blank tiles
+// if the user zooms past it.
+export const LAYERS = {
+  light: {
+    label: 'Light',
+    url: `${ESRI_BASE}/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}`,
+    attribution: ESRI_ATTRIBUTION,
+    maxZoom: 20,
+    maxNativeZoom: 19,
+  },
+  dark: {
+    label: 'Dark',
+    url: `${ESRI_BASE}/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}`,
+    attribution: ESRI_ATTRIBUTION,
+    maxZoom: 20,
+    maxNativeZoom: 19,
+  },
+}

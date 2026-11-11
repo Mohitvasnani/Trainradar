@@ -19,6 +19,7 @@
   --ontime: #4caf7d;
   --late: #e0a030;
   --cancelled: #b3372a;
+  --terminus-end: #9b7cff;
   --shadow: rgba(0, 0, 0, 0.4);
 }
 
@@ -33,5 +34,6 @@
   --ontime: #2e7d52;
   --late: #b57314;
   --cancelled: #a12c20;
+  --terminus-end: #6a45d9;
   --shadow: rgba(0, 0, 0, 0.15);
 }

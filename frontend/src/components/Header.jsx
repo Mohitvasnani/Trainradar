@@ -16,8 +16,7 @@ export default function Header({ theme,
     statusDef =`live updated ${updatedAt.toLocaleTimeString()}`}
   return (
     <header className="header">
-          <img src="/lockup.png" alt="" className="brand-logo" />
-      <span className="brand">TrainRadar</span>
+          <img src="/lockup.svg" alt="TrainRadar" className="brand-logo" />
       <span className={statusLevel}>{statusDef}</span>
       <button className="theme-btn" onClick={onToggleTheme}>
         {theme === 'dark' ? 'Light' : 'Dark'}

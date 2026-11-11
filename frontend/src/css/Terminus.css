@@ -1,0 +1,35 @@
+/* Origin and destination markers.
+   Leaflet CircleMarker cannot hold text, so these are divIcons.
+   The icon HTML renders inside the map pane, which sits under .app,
+   so the theme custom properties cascade into it normally. */
+
+.terminus-marker {
+  background: none;
+  border: none;
+}
+
+.terminus-marker span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid;
+  background: var(--bg);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  box-shadow: 0 1px 3px var(--shadow);
+}
+
+.terminus-start {
+  border-color: var(--ontime);
+  color: var(--ontime);
+}
+
+.terminus-end {
+  border-color: var(--terminus-end);
+  color: var(--terminus-end);
+}

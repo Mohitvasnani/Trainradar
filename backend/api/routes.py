@@ -42,32 +42,32 @@ def train_area():
     token =auth.get_token()
     now = datetime.now(UK).replace(tzinfo=None)
 
-    today =  date.today().isoformat()
+  
 
     candidates = {}
     for crs in state.CORRIDOR_STATIONS:
-
-
         try:
-
             board = cache.get_board_cached(token, crs)
-        except Exception:  continue
+        except Exception:
+            continue
 
         for ser in board.get("services", []):
-            if not estimation.is_train_running(ser, now):   continue
-            uid = ser.get("scheduleMetadata", {}).get("identity")
-            if uid:               
-                candidates[uid] =ser
+            if not estimation.is_train_running(ser, now):
+                continue
+            meta = ser.get("scheduleMetadata", {})
+            uid = meta.get("identity")
+            run_date = meta.get("departureDate") or date.today().isoformat()
+            if uid:
+                candidates[(uid, run_date)] = ser
 
-    
     results = []
-    for uid, ser in candidates.items():
+    for (uid, run_date), ser in candidates.items():
         try:
-            train = estimation.estimate_trainPosition(ser, token, today, now)
+            train = estimation.estimate_trainPosition(ser, token, run_date, now)
             if train:
                 results.append(train)
-        except Exception as e: 
-            print(f"estimate failed for {uid}: {e!r}")
+        except Exception as e:
+            print(f"estimate failed for {uid} {run_date}: {e!r}")
             continue
 
     
