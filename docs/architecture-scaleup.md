@@ -1,6 +1,13 @@
 # TrainRadar scale-up: architecture redesign
 
-Status: draft, for discussion. Written before any code changes.
+Status: design note, written in October 2026 before any scale-up code existed.
+Kept as a record of the reasoning rather than as current documentation.
+
+Since it was written, the geometry stage described below has been built and
+shipped: the national OSM rail graph (471,278 nodes, 954,614 edges) replaced
+the Liverpool-Leeds corridor graph, route geometry is precomputed to disk
+instead of routed at request time, and the app is deployed. The Network Rail
+STOMP migration and the shared state store are still ahead.
 
 ## Why the current architecture can't just be pointed at a bigger bounding box
 

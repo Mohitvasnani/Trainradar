@@ -1,5 +1,10 @@
-"""
+"""Render the rail-network fragmentation figure used in the dissertation.
 
+Crops the national rail graph to a bounding box around Liverpool and
+Manchester and plots it, colouring each connected component separately so
+that breaks in the OSM track network are visible. Writes
+`backend/outputs/fragmentation.png`. Needs requirements-dev.txt and a built
+`backend/data/rail_graph.graphml`.
 """
 import os
 import sys

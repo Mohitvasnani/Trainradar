@@ -7,42 +7,45 @@ from zoneinfo import ZoneInfo
 
 UK = ZoneInfo("Europe/London")
 
-bp = Blueprint( "api",   __name__)
+bp = Blueprint("api", __name__)
 
 
 @bp.get("/")
-def home():    return "TrainRadar API is running"
+def home():
+    return "TrainRadar API is running"
 
 
 @bp.get("/api/status")
-def status():  return jsonify({
+def status():
+    return jsonify({
         "status": "ok",
-                "graphLoaded": state.graph_loaded(),
-        "routesCached":cache.route_cache_size(),
-        "coverage": state.CORRIDOR_STATIONS})
+        "graphLoaded": state.graph_loaded(),
+        "routesCached": cache.route_cache_size(),
+        "coverage": state.CORRIDOR_STATIONS,
+    })
 
 
 @bp.get("/api/departures/<crs>")
 def departures(crs):
-    crs =crs.upper()
-    token=auth.get_token()
-    try:        board = cache.get_board_cached(token, crs)
+    crs = crs.upper()
+    token = auth.get_token()
+
+    try:
+        board = cache.get_board_cached(token, crs)
     except Exception:
+        return jsonify({"error": f"could not fetch departures for {crs}"}), 502
 
-        return jsonify({"error": f"not getting depature {crs}"}), 502
-
-    
-    services =[estimation.full_depboard(ser) for ser in board.get("services",[])]
+    services = [estimation.full_depboard(ser) for ser in board.get("services", [])]
     return jsonify({
-        "station": crs, "services": services})
+        "station": crs,
+        "services": services,
+    })
 
 
 @bp.get("/api/trains")
 def train_area():
-    token =auth.get_token()
+    token = auth.get_token()
     now = datetime.now(UK).replace(tzinfo=None)
-
-  
 
     candidates = {}
     for crs in state.CORRIDOR_STATIONS:
@@ -70,19 +73,20 @@ def train_area():
             print(f"estimate failed for {uid} {run_date}: {e!r}")
             continue
 
-    
     if results:
         state.save_last_good(results)
         return jsonify({
             "coverage": state.CORRIDOR_STATIONS,
             "count": len(results),
-            "trains": results, "stale": False })
+            "trains": results,
+            "stale": False,
+        })
 
     stale = state.get_last_good()
     return jsonify({
-        "coverage":state.CORRIDOR_STATIONS,
-        "count":len(stale),
-        "trains":stale,
+        "coverage": state.CORRIDOR_STATIONS,
+        "count": len(stale),
+        "trains": stale,
         "stale": True,
     })
 
@@ -94,39 +98,38 @@ def leg(crs_a, crs_b):
 
     track = cache.get_route(crs_a, crs_b)
     if track is None:
-
-
         return jsonify({"error": f"no track between {crs_a} and {crs_b}"}), 404
 
     return jsonify({
-        "from": crs_a, "to": crs_b,
-        "coordinates": [[round(y, 5), round(x, 5)] for x, y in track.coords] })
+        "from": crs_a,
+        "to": crs_b,
+        "coordinates": [[round(y, 5), round(x, 5)] for x, y in track.coords],
+    })
 
 
 @bp.get("/api/journey/<uid>/<run_date>")
-def journey(uid,   run_date):
+def journey(uid, run_date):
     token = auth.get_token()
     now = datetime.now(UK).replace(tzinfo=None)
 
     try:
-        data=   estimation.journey_building(token,  uid,run_date, now)
+        data = estimation.journey_building(token, uid, run_date, now)
     except Exception:
-        return jsonify({"Error": f"unable to build {uid}"}), 502
+        return jsonify({"error": f"unable to build {uid}"}), 502
 
     if not data["stops"]:
-        return jsonify({
-            "Error": f"no journey found for {uid} on{run_date}"
-            }),404
+        return jsonify({"error": f"no journey found for {uid} on {run_date}"}), 404
+
     return jsonify(data)
 
 
 @bp.get("/api/legs")
 def all_legs():
-    res =[]
-    seen= set()
+    res = []
+    seen = set()
 
     for train in state.get_last_good():
-        key= (train["legFromCrs"], train["legToCrs"])
+        key = (train["legFromCrs"], train["legToCrs"])
         if key in seen:
             continue
         seen.add(key)
@@ -135,6 +138,10 @@ def all_legs():
         if track is None:
             continue
 
-        res.append({"from": key [ 0 ],  "to": key[ 1],
-            "coordinates": [[round(y, 5), round(x, 5)] for x, y in track.coords]})
+        res.append({
+            "from": key[0],
+            "to": key[1],
+            "coordinates": [[round(y, 5), round(x, 5)] for x, y in track.coords],
+        })
+
     return jsonify({"legs": res})

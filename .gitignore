@@ -29,3 +29,6 @@ networkrail-data/
 osm-data/
 backend/data/route_cache_*_backup.json
 backend/scripts/diagnostic_results_sample.json
+*.bak
+*.bak2
+backend/data/route_cache-*.json

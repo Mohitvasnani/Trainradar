@@ -1,16 +1,44 @@
-# React + Vite
+# TrainRadar frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React and Leaflet map client for the TrainRadar API. See the
+[repository README](../README.md) for the project as a whole, the estimation
+pipeline, and the coverage figures.
 
-Currently, two official plugins are available:
+## Running locally
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+    npm install
+    cp .env.example .env
+    npm run dev
 
-## React Compiler
+Vite serves on http://localhost:5173. `VITE_API_BASE` must point at a running
+backend, `http://127.0.0.1:5000` by default.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+`VITE_` variables are inlined at build time rather than read at runtime, so
+they have to be set before `npm run build` runs, not after.
 
-## Expanding the ESLint configuration
+## Layout
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+    src/
+      App.jsx          Root component, owns selection and pin state
+      api/             Backend client
+      components/      Map, sidebar, search, legend, train detail panel
+      hooks/           Data fetching, journey and leg geometry, pinning
+      css/             Per-component styles
+      theme.css        Light and dark custom properties
+
+Basemaps are CARTO Positron, Dark Matter and Voyager, served without an API
+key.
+
+## Scripts
+
+| Command | Does |
+|---|---|
+| `npm run dev` | Dev server with HMR |
+| `npm run build` | Production build to `dist/` |
+| `npm run preview` | Serve the built output |
+| `npm run lint` | ESLint |
+
+## Deployment
+
+Vercel, with root directory `frontend` and `VITE_API_BASE` set to the deployed
+API origin before the build runs.

@@ -21,9 +21,12 @@ Geometry is precomputed nationally from OpenStreetMap and committed as
 | | |
 |---|---|
 | Station pairs from the national timetable | 4,962 |
-| Pairs with plausible routed geometry | 4,566 (92.0%) |
-| Rail graph | 468,538 nodes, 941,316 edges |
-| Route cache | 6.24 MB, simplified at 5 m |
+| Pairs with plausible routed geometry | 4,768 (96.1%) |
+| Rail graph | 471,278 nodes, 954,614 edges |
+| Route cache | 6.17 MB, simplified at 5 m |
+
+Weighted by how often each pair actually runs in the timetable rather than
+counting pairs equally, coverage is 95.9%.
 
 A leg with no usable geometry is not dropped. The train is still shown, marked
 as approximate, with no track line drawn.
@@ -223,6 +226,7 @@ Frontend on Vercel with root directory `frontend`. Set `VITE_API_BASE` before th
         route_cache.json     Precomputed national leg geometry
       scripts/               Geometry pipeline and analysis
       testing_suite/         Unit tests
+      make_fragmentation_figure.py   Network fragmentation figure
       dev_diagnostics/       Dev scripts that render Folium maps
       evaluation/            Accuracy harness and collected results
 
@@ -259,10 +263,16 @@ its own terms:
 Libraries: OSMnx, NetworkX, Shapely, GeoPy, SciPy, Flask, React, Leaflet.
 
 ## Scope and accuracy
-- delay in loading services at it is using free tier deployment options
+
+- The hosted demo polls the departure board for Manchester Piccadilly only, so
+  it shows services calling there rather than the whole GB network. The
+  geometry underneath it is national. `CORRIDOR_STATIONS` in
+  `backend/services/state.py` sets which boards are polled.
+- The backend runs on a free Render instance that sleeps when idle, so the
+  first request after a quiet period can take up to a minute to return.
 - Positions are estimates derived from schedule data, not observations. Error
   correlates more strongly with leg duration than with lateness.
-- 92% of station pairs have routed track geometry. The rest are shown as
+- 96% of station pairs have routed track geometry. The rest are shown as
   approximate, positioned between their two stations with no track line drawn,
   rather than hidden from the map.
 - Which trains appear is set by the station departure boards polled, not by
